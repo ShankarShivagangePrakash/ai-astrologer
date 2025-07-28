@@ -1,0 +1,17 @@
+{
+  "description": "House meanings and significations - to be populated",
+  "houses": {
+    "1": "self, personality, appearance",
+    "2": "wealth, family, speech",
+    "3": "courage, siblings, communication",
+    "4": "home, mother, comfort",
+    "5": "children, education, creativity",
+    "6": "health, enemies, service",
+    "7": "partnership, marriage, business",
+    "8": "longevity, transformation, occult",
+    "9": "luck, father, spirituality",
+    "10": "career, reputation, authority",
+    "11": "gains, friends, aspirations",
+    "12": "losses, expenses, liberation"
+  }
+}

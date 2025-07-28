@@ -1,0 +1,1 @@
+# Remedy suggestions display component

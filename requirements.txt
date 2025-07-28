@@ -1,0 +1,67 @@
+# Streamlit and Web Framework
+streamlit
+streamlit-elements
+
+# # Astronomical Calculations
+# pyswisseph==2.10.3.2
+# skyfield==1.48
+# astropy==5.3.4
+
+# # RAG and AI Components
+# langchain==0.1.11
+# langchain-community==0.0.25
+# chromadb==0.4.22
+# sentence-transformers==2.5.1
+# openai==1.12.0
+# tiktoken==0.6.0
+
+# # Vector Database and Search
+# faiss-cpu==1.7.4
+# pinecone-client==3.0.3
+
+# # Data Processing
+# pandas==2.2.0
+# numpy==1.26.3
+# scipy==1.12.0
+
+# # Visualization
+# plotly==5.18.0
+# matplotlib==3.8.2
+# seaborn==0.13.2
+# PIL==10.2.0
+
+# # Date and Time
+# python-dateutil==2.8.2
+# pytz==2023.4
+# timezonefinder==6.2.0
+# geopy==2.4.1
+
+# # File Processing
+# PyPDF2==3.0.1
+# python-docx==1.1.0
+# openpyxl==3.1.2
+
+# # Configuration and Environment
+# python-dotenv==1.0.1
+# pydantic==2.6.1
+# pydantic-settings==2.1.0
+
+# # Caching and Performance
+# redis==5.0.1
+# diskcache==5.6.3
+
+# # Utilities
+# requests==2.31.0
+# beautifulsoup4==4.12.3
+# lxml==5.1.0
+# tqdm==4.66.2
+
+# # Development and Testing
+# pytest==8.0.0
+# pytest-cov==4.0.0
+# black==24.1.1
+# flake8==7.0.0
+
+# # Optional: For advanced features
+# reportlab==4.1.0  # PDF generation
+# fpdf2==2.7.7      # Alternative PDF library
