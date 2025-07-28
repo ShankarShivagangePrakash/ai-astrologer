@@ -1,6 +1,8 @@
 # Streamlit and Web Framework
 streamlit
 streamlit-elements
+langchain
+langchain_openai
 
 # # Astronomical Calculations
 # pyswisseph==2.10.3.2
