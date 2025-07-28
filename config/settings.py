@@ -36,10 +36,5 @@ def get_api_key():
     """Get OpenAI API key from environment"""
     return os.getenv("OPENAI_API_KEY")
 
-def validate_environment():
-    """Validate required environment variables"""
-    api_key = get_api_key()
-    if not api_key:
-        st.warning("⚠️ OpenAI API key not found. Please set OPENAI_API_KEY environment variable for AI features.")
-        return False
-    return True
+# Import environment validation from common utilities
+from src.utils.common import validate_environment

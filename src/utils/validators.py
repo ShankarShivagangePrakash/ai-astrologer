@@ -1,52 +1,30 @@
+"""
+Data validation functions.
+Note: Common validation logic has been moved to src/utils/common.py
+This module now contains application-specific validators.
+"""
 import streamlit as st
-from datetime import datetime
+from .common import (
+    set_session_value,
+    SESSION_KEYS,
+    validate_coordinates as common_validate_coordinates,
+    validate_birth_inputs as common_validate_birth_inputs
+)
 
 def initialize_session_state():
     """Initialize session state variables"""
-    if 'birth_data' not in st.session_state:
-        st.session_state.birth_data = {}
-    if 'chart_calculated' not in st.session_state:
-        st.session_state.chart_calculated = False
-    if 'predictions_generated' not in st.session_state:
-        st.session_state.predictions_generated = False
-    if 'quick_prediction' not in st.session_state:
-        st.session_state.quick_prediction = ""
+    # Initialize all required session state keys
+    session_defaults = {
+        SESSION_KEYS['BIRTH_DATA']: {},
+        SESSION_KEYS['CHART_CALCULATED']: False,
+        SESSION_KEYS['PREDICTIONS_GENERATED']: False,
+        SESSION_KEYS['QUICK_PREDICTION']: ""
+    }
+    
+    for key, default_value in session_defaults.items():
+        if key not in st.session_state:
+            set_session_value(key, default_value)
 
-def validate_birth_data(birth_date, birth_time, birth_place):
-    """Validate birth data inputs"""
-    errors = []
-    
-    # Validate date
-    if not birth_date:
-        errors.append("Birth date is required")
-    elif birth_date > datetime.now().date():
-        errors.append("Birth date cannot be in the future")
-    
-    # Validate time
-    if not birth_time:
-        errors.append("Birth time is required")
-    
-    # Validate place
-    if not birth_place or len(birth_place.strip()) < 2:
-        errors.append("Please enter a valid birth place")
-    
-    return errors
-
-def validate_coordinates(latitude, longitude):
-    """Validate geographic coordinates"""
-    errors = []
-    
-    try:
-        lat = float(latitude)
-        lng = float(longitude)
-        
-        if not (-90 <= lat <= 90):
-            errors.append("Latitude must be between -90 and 90")
-        
-        if not (-180 <= lng <= 180):
-            errors.append("Longitude must be between -180 and 180")
-            
-    except (ValueError, TypeError):
-        errors.append("Coordinates must be valid numbers")
-    
-    return errors
+# Re-export commonly used validation functions from common module
+validate_birth_data = common_validate_birth_inputs
+validate_coordinates = common_validate_coordinates
