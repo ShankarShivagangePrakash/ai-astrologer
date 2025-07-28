@@ -3,6 +3,8 @@ streamlit
 streamlit-elements
 langchain
 langchain_openai
+langchain-core
+langchain-community
 
 # # Astronomical Calculations
 # pyswisseph==2.10.3.2

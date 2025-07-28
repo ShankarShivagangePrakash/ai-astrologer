@@ -57,7 +57,7 @@ def render_quick_actions():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("� View Birth Chart", key="quick_birth_chart", use_container_width=True):
+        if st.button("📊 View Birth Chart", key="quick_birth_chart", use_container_width=True):
             st.switch_page("pages/02_Birth_Chart.py")
     
     with col2:
