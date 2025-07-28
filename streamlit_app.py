@@ -28,14 +28,8 @@ def initialize_session_state():
     if 'predictions_generated' not in st.session_state:
         st.session_state.predictions_generated = False
 
-def main():
-    # Load custom styling
-    load_custom_css()
-    
-    # Initialize session state
-    initialize_session_state()
-    
-    # Sidebar navigation
+def render_sidebar_navigation():
+    """Render sidebar navigation menu"""
     st.sidebar.title("🌟 Navigation")
     st.sidebar.markdown("---")
     
@@ -54,13 +48,15 @@ def main():
         st.switch_page("pages/06_💎_Remedies.py")
     if st.sidebar.button("📋 Reports", use_container_width=True):
         st.switch_page("pages/07_📋_Reports.py")
-    
-    # Main content area
+
+def render_header():
+    """Render main header section"""
     st.title("🔮 Vedic Astrologer App")
     st.markdown("### Welcome to AI-Powered Vedic Astrology")
     st.write("Get personalized predictions based on ancient Hindu astrology combined with modern AI.")
-    
-    # Quick start section
+
+def render_how_it_works():
+    """Render how it works section"""
     st.subheader("How It Works")
     col1, col2, col3 = st.columns(3)
     
@@ -75,33 +71,67 @@ def main():
     with col3:
         st.warning("💎 **Step 3: Receive Remedies**")
         st.write("Get personalized suggestions for a better life")
-    
-    # Quick input section
+
+def render_birth_form():
+    """Render birth details input form"""
     st.subheader("Quick Start")
     
     with st.expander("Enter Birth Details (Optional)", expanded=False):
         col1, col2 = st.columns(2)
         
         with col1:
-            birth_date = st.date_input("Birth Date", value=datetime.now().date())
-            birth_time = st.time_input("Birth Time", value=datetime.now().time())
+            # Date input
+            today = datetime.now().date()
+            min_date = datetime(today.year - 100, 1, 1).date()
+            max_date = today
+            
+            birth_date = st.date_input(
+                "Birth Date", 
+                value=today,
+                min_value=min_date,
+                max_value=max_date,
+                help="Select your birth date (supports dates up to 100 years ago)"
+            )
+            
+            # Time input
+            st.write("**Select birth time:**")
+            time_col1, time_col2 = st.columns(2)
+            with time_col1:
+                birth_hour = st.selectbox(
+                    "Hour", 
+                    options=list(range(0, 24)),
+                    index=0,
+                    format_func=lambda x: f"{x:02d}"
+                )
+            with time_col2:
+                birth_minute = st.selectbox(
+                    "Minute", 
+                    options=list(range(0, 60)),
+                    index=0,
+                    format_func=lambda x: f":{x:02d}"
+                )
         
         with col2:
             birth_place = st.text_input("Birth Place", placeholder="e.g., New Delhi, India")
             
+        # Process form submission
         if st.button("Generate Quick Prediction", type="primary"):
             if birth_place:
-                # Store in session state
+                selected_time = datetime.now().replace(hour=birth_hour, minute=birth_minute, second=0, microsecond=0).time()
+                
                 st.session_state.birth_data = {
                     'date': birth_date,
-                    'time': birth_time,
-                    'place': birth_place
+                    'time': selected_time,
+                    'place': birth_place,
+                    'hour': birth_hour,
+                    'minute': birth_minute
                 }
-                st.success("✅ Birth data saved! Navigate to Birth Chart to continue.")
+                st.success(f"✅ Birth data saved! Time: {birth_hour:02d}:{birth_minute:02d} - Navigate to Birth Chart to continue.")
             else:
                 st.error("Please enter your birth place.")
-    
-    # Session status
+
+def render_session_status():
+    """Render session status indicators"""
     st.subheader("Session Status")
     col1, col2, col3 = st.columns(3)
     
@@ -122,8 +152,9 @@ def main():
             st.success("✅ Predictions ready")
         else:
             st.info("ℹ️ No predictions yet")
-    
-    # Features overview
+
+def render_features_overview():
+    """Render available features overview"""
     st.subheader("Available Features")
     
     features = {
@@ -138,8 +169,9 @@ def main():
     
     for feature, description in features.items():
         st.write(f"**{feature}**: {description}")
-    
-    # Footer
+
+def render_footer():
+    """Render footer section"""
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; padding: 20px;'>
@@ -147,6 +179,21 @@ def main():
         <p>© 2025 Vedic Astrologer App - Ancient Wisdom, Modern Technology</p>
     </div>
     """, unsafe_allow_html=True)
+
+def main():
+    """Main application function"""
+    # Initialize app
+    load_custom_css()
+    initialize_session_state()
+    
+    # Render UI components
+    render_sidebar_navigation()
+    render_header()
+    render_how_it_works()
+    render_birth_form()
+    render_session_status()
+    render_features_overview()
+    render_footer()
 
 if __name__ == "__main__":
     main()
