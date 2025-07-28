@@ -29,9 +29,32 @@ def render_predictions_content(birth_data):
                 st.session_state.detailed_prediction = detailed_prediction
     
     # Show detailed prediction if available
-    if hasattr(st.session_state, 'detailed_prediction'):
+    if hasattr(st.session_state, 'detailed_prediction') and st.session_state.detailed_prediction:
+        st.markdown("---")
         st.subheader("🔬 Detailed Astrological Analysis")
-        st.write(st.session_state.detailed_prediction)
+        
+        # Use container to handle long content properly
+        with st.container():
+            # Display the prediction in a more readable format
+            prediction_text = st.session_state.detailed_prediction
+            
+            # Handle potential markdown formatting
+            if prediction_text:
+                st.markdown(prediction_text)
+            else:
+                st.error("No prediction content generated. Please try again.")
+        
+        # Add option to regenerate
+        st.markdown("---")
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            if st.button("🔄 Regenerate Analysis", key="regen_detailed"):
+                del st.session_state.detailed_prediction
+                st.rerun()
+        with col2:
+            if st.button("💾 Save Analysis", key="save_detailed"):
+                st.success("Analysis saved to session!")
+                # You can implement actual saving logic here later
 
 def main():
     page_config = {

@@ -25,7 +25,8 @@ def generate_quick_prediction(birth_date, birth_time, birth_place):
     Keep the response concise (under 200 words) and encouraging. Focus on general Vedic astrology principles.
     """
     
-    return generate_ai_response(prompt, "🔮 Generating your personalized prediction...")
+    # Remove spinner from here as it's handled at the UI level
+    return generate_ai_response(prompt)
 
 def generate_detailed_prediction(birth_data):
     """Generate detailed astrological prediction for comprehensive analysis"""
@@ -40,14 +41,16 @@ def generate_detailed_prediction(birth_data):
     Birth Place: {birth_data['place']}
     
     Please provide detailed insights on:
-    1. Personality and character traits
-    2. Career and professional life
-    3. Relationships and marriage
-    4. Health and well-being
-    5. Spiritual path and life purpose
-    6. Major life periods and timing
+    1. **Personality and Character Traits**
+    2. **Career and Professional Life**
+    3. **Relationships and Marriage**
+    4. **Health and Well-being**
+    5. **Spiritual Path and Life Purpose**
+    6. **Major Life Periods and Timing**
     
     Base your analysis on traditional Vedic astrology principles and provide practical guidance.
+    Format your response with clear sections and bullet points for easy reading.
     """
     
-    return generate_ai_response(prompt, "🔮 Generating comprehensive astrological analysis...")
+    # Remove spinner from here as it's handled at the UI level
+    return generate_ai_response(prompt)

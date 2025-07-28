@@ -101,13 +101,25 @@ def get_birth_data_summary():
     """Get formatted summary of current birth data"""
     birth_data = get_session_value('birth_data', {})
     if not birth_data:
-        return "No birth data entered"
+        return "No birth data saved"
     
     date_str = birth_data.get('date', 'Unknown').strftime('%d/%m/%Y') if birth_data.get('date') else 'Unknown'
     time_str = birth_data.get('time', 'Unknown').strftime('%H:%M') if birth_data.get('time') else 'Unknown'
     place_str = birth_data.get('place', 'Unknown')
     
     return f"📅 {date_str} ⏰ {time_str} 📍 {place_str}"
+
+def is_birth_data_complete():
+    """Check if complete birth data is available"""
+    birth_data = get_session_value(SESSION_KEYS['BIRTH_DATA'], {})
+    required_fields = ['date', 'time', 'place']
+    return all(birth_data.get(field) for field in required_fields)
+
+def clear_session_data():
+    """Clear all session data (useful for starting fresh)"""
+    for key in SESSION_KEYS.values():
+        if key in st.session_state:
+            del st.session_state[key]
 
 # =============================================================================
 # AI MODEL UTILITIES

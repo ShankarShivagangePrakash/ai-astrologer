@@ -51,31 +51,54 @@ def render_how_it_works():
         st.warning("💎 **Step 3: Receive Remedies**")
         st.write("Get personalized suggestions for a better life")
 
-def render_session_status():
-    """Render session status indicators using common utilities"""
-    st.subheader("Session Status")
-    col1, col2, col3 = create_three_column_layout()
+def render_quick_actions():
+    """Render quick action buttons for common tasks"""
+    st.write("#### 🚀 Quick Actions")
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        create_status_indicator(
-            has_session_data(SESSION_KEYS['BIRTH_DATA']),
-            "✅ Birth data entered",
-            "ℹ️ No birth data yet"
-        )
+        if st.button("� View Birth Chart", key="quick_birth_chart", use_container_width=True):
+            st.switch_page("pages/02_Birth_Chart.py")
     
     with col2:
-        create_status_indicator(
-            get_session_value(SESSION_KEYS['CHART_CALCULATED'], False),
-            "✅ Chart calculated",
-            "ℹ️ Chart not calculated"
-        )
+        if st.button("🔮 Get Predictions", key="quick_predictions", use_container_width=True):
+            st.switch_page("pages/03_Predictions.py")
     
     with col3:
-        create_status_indicator(
-            get_session_value(SESSION_KEYS['PREDICTIONS_GENERATED'], False),
-            "✅ Predictions ready",
-            "ℹ️ No predictions yet"
-        )
+        if st.button("⏰ Dasha Analysis", key="quick_dasha", use_container_width=True):
+            st.switch_page("pages/04_Dasha_Analysis.py")
+
+def render_session_status():
+    """Render current session status and birth data summary"""
+    from src.utils.common import get_birth_data_summary, is_birth_data_complete
+    
+    # Display birth data status
+    st.write("### 📋 Current Session")
+    
+    if is_birth_data_complete():
+        st.success(f"✅ Birth data saved: {get_birth_data_summary()}")
+        
+        # Show feature availability
+        st.write("**Available Features:**")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("• 📊 Birth Chart Analysis")
+            st.write("• 🔮 AI Predictions")
+            st.write("• ⏰ Dasha Analysis")
+        with col2:
+            st.write("• 🌟 Transit Analysis")
+            st.write("• 💊 Remedies")
+            st.write("• 📄 Reports")
+        
+        # Quick actions
+        render_quick_actions()
+            
+    else:
+        st.warning(f"⚠️ Incomplete birth data: {get_birth_data_summary()}")
+        st.info("📝 Please complete your birth information to access all features.")
+        
+        if st.button("➕ Enter Birth Data", key="enter_birth_data", use_container_width=True):
+            st.switch_page("streamlit_app.py")
 
 def render_features_overview():
     """Render available features overview"""

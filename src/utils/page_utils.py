@@ -51,13 +51,55 @@ def check_birth_data_and_render(content_callback, page_title="this page"):
     
     if birth_data:
         # Birth data exists, render the content
-        st.success("✅ Birth data available!")
+        st.success("✅ Birth data available for analysis!")
+        
+        # Show birth data summary in an expander
+        with st.expander("📋 View Birth Data", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"**📅 Date:** {birth_data.get('date', 'Unknown')}")
+                st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
+            with col2:
+                st.write(f"**⏰ Time:** {birth_data.get('time', 'Unknown')}")
+                if birth_data.get('hour') is not None:
+                    st.write(f"**🕐 Precise:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
+        
+        st.markdown("---")
         content_callback(birth_data)
     else:
-        # No birth data, show warning and home button
-        st.warning("⚠️ No birth data found. Please enter your birth details on the Home page first.")
-        if st.button("Go to Home Page", type="primary", key=f"home_btn_{page_title}"):
-            st.switch_page("streamlit_app.py")
+        # No birth data, show enhanced warning
+        st.error("🚫 **Birth Data Required**")
+        st.write(f"To access **{page_title}**, you need to save your birth details first.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info("""
+            **📝 Steps to get started:**
+            1. Click the "🏠 Home" button in the sidebar
+            2. Enter your birth date, time, and place
+            3. Click "💾 Save Birth Data"
+            4. Return to this page for analysis
+            """)
+        
+        with col2:
+            st.warning("""
+            **⚠️ Why do we need this?**
+            
+            Vedic astrology requires precise birth information to:
+            - Calculate planetary positions
+            - Determine house placements  
+            - Generate accurate predictions
+            - Provide personalized analysis
+            """)
+        
+        # Enhanced navigation buttons
+        nav_col1, nav_col2 = st.columns(2)
+        with nav_col1:
+            if st.button("🏠 Go to Home Page", type="primary", key=f"home_btn_{page_title}"):
+                st.switch_page("streamlit_app.py")
+        with nav_col2:
+            if st.button("🔄 Refresh Page", key=f"refresh_btn_{page_title}"):
+                st.rerun()
 
 def create_birth_info_display(birth_data):
     """
