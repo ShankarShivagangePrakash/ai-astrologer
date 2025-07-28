@@ -14,7 +14,7 @@ def render_sidebar_navigation():
     
     # Navigation buttons with unique keys
     if st.sidebar.button("🏠 Home", use_container_width=True, key="nav_home"):
-        st.rerun()
+        st.switch_page("streamlit_app.py")
     if st.sidebar.button("📊 Birth Chart", use_container_width=True, key="nav_birth_chart"):
         st.switch_page("pages/02_Birth_Chart.py")
     if st.sidebar.button("🔮 Predictions", use_container_width=True, key="nav_predictions"):
