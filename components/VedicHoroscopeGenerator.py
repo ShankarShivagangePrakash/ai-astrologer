@@ -210,24 +210,24 @@ class VedicHoroscopeGenerator:
         return houses_with_planets
 
     def _draw_enhanced_planets(self, ax, x, y, planets_list):
-        """Draw planets with symbols and colors"""
+        """Draw planets with names and colors"""
         if len(planets_list) == 1:
             planet = planets_list[0]
-            symbol = f"{planet['symbol']}{'℞' if planet['retrograde'] else ''}"
-            ax.text(x, y, symbol, ha='center', va='center',
-                   fontsize=16, color=planet['color'], fontweight='bold')
+            planet_text = f"{planet['name']}{'(R)' if planet['retrograde'] else ''}"
+            ax.text(x, y, planet_text, ha='center', va='center',
+                   fontsize=12, color=planet['color'], fontweight='bold')
         else:
             # Multiple planets - arrange in a small grid
             cols = 2 if len(planets_list) <= 4 else 3
             for i, planet in enumerate(planets_list):
                 row = i // cols
                 col = i % cols
-                offset_x = (col - (cols-1)/2) * 0.15
-                offset_y = (row - 0.5) * 0.1
+                offset_x = (col - (cols-1)/2) * 0.2  # Increased spacing for names
+                offset_y = (row - 0.5) * 0.15        # Increased vertical spacing
                 
-                symbol = f"{planet['symbol']}{'℞' if planet['retrograde'] else ''}"
-                ax.text(x + offset_x, y + offset_y, symbol, 
-                       ha='center', va='center', fontsize=12, 
+                planet_text = f"{planet['name']}{'(R)' if planet['retrograde'] else ''}"
+                ax.text(x + offset_x, y + offset_y, planet_text, 
+                       ha='center', va='center', fontsize=10, 
                        color=planet['color'], fontweight='bold')
 
     def create_detailed_report(self, positions):
@@ -238,11 +238,11 @@ class VedicHoroscopeGenerator:
         report_data = []
         for planet_name, data in positions.items():
             report_data.append({
-                'Planet': f"{data['planet_symbol']} {planet_name}",
+                'Planet': planet_name,
                 'Sign': f"{data['sign_symbol']} {data['sign_name']}",
                 'Degree': f"{data['degree_in_sign']:.2f}°",
                 'Longitude': f"{data['longitude']:.4f}°",
-                'Status': '℞ Retrograde' if data.get('retrograde') else 'Direct',
+                'Status': '(R) Retrograde' if data.get('retrograde') else 'Direct',
                 'Speed': f"{data.get('speed', 0):.4f}°/day"
             })
         
@@ -287,12 +287,23 @@ def create_kundali_widget(birth_data=None):
         return None
     
     with st.spinner("Calculating planetary positions..."):
-        # Extract birth data
-        year = birth_data.get('year', 1990)
-        month = birth_data.get('month', 1)
-        day = birth_data.get('day', 1)
-        hour = birth_data.get('hour', 12)
-        minute = birth_data.get('minute', 0)
+        # Extract birth data - handle both session format and direct format
+        if 'date' in birth_data and 'time' in birth_data:
+            # Session format with date and time objects
+            birth_date = birth_data['date']
+            birth_time = birth_data['time']
+            year = birth_date.year
+            month = birth_date.month
+            day = birth_date.day
+            hour = birth_time.hour
+            minute = birth_time.minute
+        else:
+            # Direct format with individual fields
+            year = birth_data.get('year', 1990)
+            month = birth_data.get('month', 1)
+            day = birth_data.get('day', 1)
+            hour = birth_data.get('hour', 12)
+            minute = birth_data.get('minute', 0)
         
         # Calculate positions
         jd = calculator.calculate_julian_day_with_timezone(year, month, day, hour, minute)

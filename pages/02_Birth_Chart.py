@@ -24,7 +24,7 @@ def render_birth_chart_content(birth_data):
             help="Choose your preferred calculation method"
         )
         
-        if chart_type == "Generate vedic Horoscope":
+        if chart_type == "Generate Vedic Horoscope":
             st.info("🔬 High-precision astronomical calculations")
             positions = create_kundali_widget(birth_data)
             

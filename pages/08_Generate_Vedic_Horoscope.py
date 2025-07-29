@@ -231,71 +231,91 @@ class StreamlitVedicHoroscopeGenerator:
                 planets_list = ', '.join(houses_with_planets[house_num])
                 st.write(f"**House {house_num}:** {planets_list}")
 
-def main():
-    # Setup standard page configuration
-    setup_page("Generate Vedic Horoscope", "🔮", layout="wide")
+def render_vedic_horoscope_content(birth_data):
+    """Render vedic horoscope generation content using session birth data"""
+    # Import the enhanced component
+    from components.VedicHoroscopeGenerator import create_kundali_widget, VedicHoroscopeGenerator
     
-    # Render sidebar navigation
-    render_sidebar_navigation()
+    # Display birth data info
+    st.subheader("� Birth Information")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"**📅 Date:** {birth_data.get('date', 'Unknown')}")
+        st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
+    with col2:
+        st.write(f"**⏰ Time:** {birth_data.get('time', 'Unknown')}")
+        if birth_data.get('hour') is not None and birth_data.get('minute') is not None:
+            st.write(f"**🕐 Precise Time:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
     
-    # Auto cleanup old files
-    if CLEANUP_AVAILABLE:
-        auto_cleanup()
-    
-    # Render page header
-    render_page_header("🔮 Generate Vedic Horoscope", "Create Your Professional Vedic Birth Chart")
-    
-    # Initialize the generator
-    vedic_horoscope = StreamlitVedicHoroscopeGenerator()
-    
-    # Sidebar configuration
-    st.sidebar.header("📅 Chart Configuration")
-    
-    # Date and time inputs
-    date_col1, date_col2 = st.sidebar.columns(2)
-    with date_col1:
-        year = st.number_input("Year", min_value=1900, max_value=2100, value=1990)
-        month = st.number_input("Month", min_value=1, max_value=12, value=8)
-    with date_col2:
-        day = st.number_input("Day", min_value=1, max_value=31, value=15)
-        hour = st.number_input("Hour (24h)", min_value=0.0, max_value=23.99, value=14.5, step=0.5)
+    st.markdown("---")
     
     # Chart options
-    st.sidebar.subheader("🎨 Chart Options")
-    show_positions = st.sidebar.checkbox("Show Planetary Positions", value=True)
-    show_houses = st.sidebar.checkbox("Show Houses Summary", value=True)
-    show_technical = st.sidebar.checkbox("Show Technical Details", value=False)
+    st.subheader("🎨 Chart Options")
+    option_col1, option_col2, option_col3 = st.columns(3)
+    with option_col1:
+        show_positions = st.checkbox("Show Planetary Positions", value=True)
+    with option_col2:
+        show_houses = st.checkbox("Show Houses Summary", value=True)
+    with option_col3:
+        show_technical = st.checkbox("Show Technical Details", value=False)
     
-    if st.sidebar.button("🚀 Generate Vedic Horoscope", type="primary"):
-        with st.spinner("Calculating planetary positions..."): 
+    # Generate button
+    st.markdown("---")
+    if st.button("🚀 Generate Vedic Horoscope", type="primary", use_container_width=True):
+        # Use the enhanced create_kundali_widget function
+        positions = create_kundali_widget(birth_data)
+        
+        if positions:
+            st.markdown("---")
             
-            # Calculate positions
-            jd = vedic_horoscope.calculate_julian_day(year, month, day, hour)
-            positions = vedic_horoscope.calculate_all_positions(jd)
+            # Additional detailed information if requested
+            if show_positions:
+                with st.expander("📋 Detailed Planetary Positions", expanded=True):
+                    calculator = VedicHoroscopeGenerator()
+                    report_data = calculator.create_detailed_report(positions)
+                    if report_data:
+                        st.dataframe(report_data, use_container_width=True)
             
-            if positions:
-                # Display results
-                col1, col2 = st.columns([1.2, 0.8])
-                
-                with col1:
-                    chart_title = f"Vedic Horoscope Chart\n{day}/{month}/{year} at {hour}:00"
-                    fig = vedic_horoscope.create_north_indian_chart(positions, chart_title)
-                    st.pyplot(fig)
-                
-                with col2:
-                    if show_positions:
-                        vedic_horoscope.display_planetary_positions(positions)
+            if show_houses:
+                with st.expander("🏠 Houses Summary", expanded=True):
+                    calculator = VedicHoroscopeGenerator()
+                    houses_with_planets = calculator._group_by_houses_enhanced(positions)
                     
-                    if show_technical:
-                        st.subheader("🔧 Technical Details")
-                        st.write(f"**Julian Day:** {jd:.6f}")
-                        st.write(f"**Total Planets:** {len(positions)}")
-                
-                if show_houses:
-                    vedic_horoscope.display_houses_summary(positions)
+                    cols = st.columns(3)
+                    for i, house_num in enumerate(sorted(houses_with_planets.keys())):
+                        col_idx = i % 3
+                        with cols[col_idx]:
+                            planets_list = [p['name'] for p in houses_with_planets[house_num]]
+                            planets_text = ', '.join(planets_list)
+                            st.write(f"**House {house_num}:** {planets_text}")
             
-            else:
-                st.error("❌ Failed to calculate planetary positions. Please check your inputs.")
+            if show_technical:
+                with st.expander("🔧 Technical Details", expanded=False):
+                    calculator = VedicHoroscopeGenerator()
+                    birth_date = birth_data['date']
+                    birth_time = birth_data['time']
+                    jd = calculator.calculate_julian_day_with_timezone(
+                        birth_date.year, birth_date.month, birth_date.day,
+                        birth_time.hour, birth_time.minute
+                    )
+                    st.write(f"**Julian Day:** {jd:.6f}")
+                    st.write(f"**Total Planets:** {len(positions)}")
+                    st.write(f"**Birth Coordinates:** Using session data")
+        else:
+            st.error("❌ Failed to calculate planetary positions. Please check your birth data.")
+
+def main():
+    # Use standard page layout with birth data checking
+    page_config = {
+        'title': '🔮 Generate Vedic Horoscope',
+        'icon': '🔮',
+        'subtitle': 'Professional Vedic Birth Chart using Session Data',
+        'content_callback': render_vedic_horoscope_content,
+        'page_id': 'vedic_horoscope'
+    }
+    
+    from src.utils.page_utils import create_standard_page_layout
+    create_standard_page_layout(page_config)
 
 if __name__ == "__main__":
     main()
