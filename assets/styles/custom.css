@@ -1,2 +1,12 @@
 /* Custom CSS styles for the Streamlit app */
 /* Planetary colors, chart styling, fonts, etc. */
+
+/* Hide the default Streamlit navigation menu in sidebar */
+div[data-testid="stSidebarNav"] {
+    display: none;
+}
+
+/* Hide the navigation separator line */
+div[data-testid="stSidebarNavSeparator"] {
+    display: none;
+}

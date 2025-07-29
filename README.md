@@ -8,7 +8,7 @@ Vedic Astrology (Jyotisha) is the ancient Hindu system of astrology that origina
 
 ### Key Components:
 
-**🌟 Birth Chart (Kundali)**: A map of planetary positions at the time of birth
+**🌟 Birth Chart (vedic horoscope)**: A map of planetary positions at the time of birth
 **⏰ Dasha System**: Planetary time periods that influence different life phases  
 **🌍 Transits**: Current planetary movements and their effects
 **💫 Yogas**: Special planetary combinations that create unique life patterns
@@ -17,7 +17,7 @@ Vedic Astrology (Jyotisha) is the ancient Hindu system of astrology that origina
 ## What Our App Offers
 
 ### 📊 **Birth Chart Analysis**
-- Precise astronomical calculations using Swiss Ephemeris
+- Precise astronomical calculations using pyswisseph
 - Visual chart representation in traditional Indian formats
 - Detailed planetary position analysis
 

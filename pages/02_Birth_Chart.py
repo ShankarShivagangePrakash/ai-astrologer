@@ -5,6 +5,7 @@ from src.utils.page_utils import (
     render_coming_soon_section,
     CHART_FEATURES
 )
+from components.VedicHoroscopeGenerator import create_kundali_widget
 
 def render_birth_chart_content(birth_data):
     """Render birth chart specific content"""
@@ -14,10 +15,31 @@ def render_birth_chart_content(birth_data):
         create_birth_info_display(birth_data)
     
     with col2:
-        render_coming_soon_section(
-            "📊 Chart Generation", 
-            CHART_FEATURES
+        # Chart calculation options
+        st.subheader("📊 Chart Generation")
+        
+        chart_type = st.selectbox(
+            "Select Chart Type",
+            ["Generate Vedic Horoscope", "Traditional", "Divisional Charts"],
+            help="Choose your preferred calculation method"
         )
+        
+        if chart_type == "Generate vedic Horoscope":
+            st.info("🔬 High-precision astronomical calculations")
+            positions = create_kundali_widget(birth_data)
+            
+            if positions:
+                with st.expander("📋 Detailed Planetary Positions"):
+                    from components.VedicHoroscopeGenerator import VedicHoroscopeGenerator
+                    calculator = VedicHoroscopeGenerator()
+                    report_data = calculator.create_detailed_report(positions)
+                    if report_data:
+                        st.dataframe(report_data, use_container_width=True)
+        else:
+            render_coming_soon_section(
+                f"📊 {chart_type}", 
+                CHART_FEATURES
+            )
 
 def main():
     page_config = {

@@ -9,6 +9,18 @@ from .common import (
 
 def render_sidebar_navigation():
     """Render sidebar navigation menu"""
+    # Hide default Streamlit navigation
+    st.markdown("""
+    <style>
+    div[data-testid="stSidebarNav"] {
+        display: none;
+    }
+    div[data-testid="stSidebarNavSeparator"] {
+        display: none;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     st.sidebar.title("🌟 Navigation")
     st.sidebar.markdown("---")
     
@@ -27,6 +39,8 @@ def render_sidebar_navigation():
         st.switch_page("pages/06_Remedies.py")
     if st.sidebar.button("📋 Reports", use_container_width=True, key="nav_reports"):
         st.switch_page("pages/07_Reports.py")
+    if st.sidebar.button("🔮 Generate Vedic Horoscope", use_container_width=True, key="nav_vedic_horoscope"):
+        st.switch_page("pages/08_Generate_Vedic_Horoscope.py")
 
 def render_header():
     """Render main header section"""
@@ -96,9 +110,6 @@ def render_session_status():
     else:
         st.warning(f"⚠️ Incomplete birth data: {get_birth_data_summary()}")
         st.info("📝 Please complete your birth information to access all features.")
-        
-        if st.button("➕ Enter Birth Data", key="enter_birth_data", use_container_width=True):
-            st.switch_page("streamlit_app.py")
 
 def render_features_overview():
     """Render available features overview"""
