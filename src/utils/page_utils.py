@@ -184,11 +184,56 @@ def create_standard_page_layout(page_config):
     /* Reduce alert spacing */
     .stAlert {
         margin: 0.25rem 0 0.5rem 0 !important;
+        padding: 0.5rem 0.75rem !important;
     }
     
     /* Compact info boxes */
     .stInfo, .stWarning, .stError, .stSuccess {
         margin: 0.25rem 0 0.5rem 0 !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    /* Compact tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 0.5rem !important;
+    }
+    
+    /* Compact expanders */
+    .stExpander {
+        margin: 0.25rem 0 0.5rem 0 !important;
+    }
+    
+    .streamlit-expanderHeader {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    .streamlit-expanderContent {
+        padding: 0.5rem 0.75rem !important;
+    }
+    
+    /* Compact buttons in content */
+    .stButton > button {
+        padding: 0.375rem 0.75rem !important;
+        margin: 0.25rem 0 !important;
+    }
+    
+    /* Reduce column spacing */
+    .css-ocqkz7 {
+        gap: 0.5rem !important;
+    }
+    
+    /* Compact text inputs */
+    .stTextInput {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Reduce form spacing */
+    .stTextInput > div > div > input {
+        padding: 0.375rem 0.75rem !important;
     }
     </style>
     """, unsafe_allow_html=True)

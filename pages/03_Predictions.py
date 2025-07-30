@@ -8,7 +8,33 @@ from src.astrology.prediction_engine import generate_detailed_prediction
 from components.interactive_chat import render_interactive_chat, render_chat_sidebar_info
 
 def render_predictions_content(birth_data):
-    """Render predictions specific content"""
+    """Render predictions specific content with optimized spacing"""
+    # Add additional CSS for this specific page
+    st.markdown("""
+    <style>
+    /* Additional spacing optimizations for Predictions page */
+    .stTabs [data-baseweb="tab-panel"] > div {
+        padding-top: 0.25rem !important;
+    }
+    
+    /* Compact the birth data expander */
+    .stExpander summary {
+        padding: 0.375rem 0.75rem !important;
+    }
+    
+    /* Reduce spacing in tab content */
+    .stTabs .stVerticalBlock {
+        gap: 0.5rem !important;
+    }
+    
+    /* Make buttons more compact */
+    button[data-testid="stBaseButton-secondary"] {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Add chat sidebar info
     render_chat_sidebar_info()
     
