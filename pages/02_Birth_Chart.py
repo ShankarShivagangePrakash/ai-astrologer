@@ -109,11 +109,23 @@ def render_detailed_chart_analysis(birth_data):
 
 def render_birth_chart_content(birth_data):
     """Render birth chart specific content"""
-    # Center the chart generation content
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Use full width with padding for better layout
+    st.markdown("""
+    <style>
+    /* Add padding to chart generation section */
+    .chart-generation-container {
+        padding: 1rem 2rem;
+        border-radius: 0.5rem;
+        background-color: rgba(248, 249, 251, 0.5);
+        margin-bottom: 1rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    with col2:
-        # Chart calculation options
+    # Chart calculation options with padding
+    with st.container():
+        st.markdown('<div class="chart-generation-container">', unsafe_allow_html=True)
+        
         st.subheader("📊 Chart Generation")
         
         chart_type = st.selectbox(
@@ -122,29 +134,31 @@ def render_birth_chart_content(birth_data):
             help="Choose your preferred calculation method"
         )
         
-        if chart_type == "Generate Vedic Horoscope":
-            positions = create_kundali_widget(birth_data)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    if chart_type == "Generate Vedic Horoscope":
+        positions = create_kundali_widget(birth_data)
+        
+        if positions:
+            # Generate chart summary automatically
+            st.markdown("---")
+            render_chart_summary(positions, birth_data)
             
-            if positions:
-                # Generate chart summary automatically
-                st.markdown("---")
-                render_chart_summary(positions, birth_data)
-                
-                # Generate detailed analysis automatically
-                st.markdown("---")
-                render_detailed_chart_analysis(birth_data)
-                
-                with st.expander("📋 Detailed Planetary Positions"):
-                    from components.VedicHoroscopeGenerator import VedicHoroscopeGenerator
-                    calculator = VedicHoroscopeGenerator()
-                    report_data = calculator.create_detailed_report(positions)
-                    if report_data:
-                        st.dataframe(report_data, use_container_width=True)
-        else:
-            render_coming_soon_section(
-                f"📊 {chart_type}", 
-                CHART_FEATURES
-            )
+            # Generate detailed analysis automatically
+            st.markdown("---")
+            render_detailed_chart_analysis(birth_data)
+            
+            with st.expander("📋 Detailed Planetary Positions"):
+                from components.VedicHoroscopeGenerator import VedicHoroscopeGenerator
+                calculator = VedicHoroscopeGenerator()
+                report_data = calculator.create_detailed_report(positions)
+                if report_data:
+                    st.dataframe(report_data, use_container_width=True)
+    else:
+        render_coming_soon_section(
+            f"📊 {chart_type}", 
+            CHART_FEATURES
+        )
 
 def main():
     page_config = {
