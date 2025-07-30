@@ -8,16 +8,6 @@ from src.astrology.prediction_engine import (
 
 def render_interactive_chat(birth_data):
     """Render interactive chat interface for astrological questions"""
-    st.subheader("💬 Ask the Astrologer")
-    st.write("Ask any questions about your birth chart and get personalized insights!")
-    
-    # Chat controls
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        if st.button("🔄 Clear Chat", key="clear_chat_btn"):
-            clear_chat_history()
-            st.rerun()
-    
     # Display chat history
     chat_messages = get_chat_history()
     
@@ -70,24 +60,31 @@ def render_interactive_chat(birth_data):
         del st.session_state.suggested_question
     
     # Submit button
-    if st.button("🔮 Get Answer", type="primary", key="submit_question", disabled=not user_question.strip()):
-        if user_question.strip():
-            with st.spinner("🔮 Consulting the stars..."):
-                # Get AI response
-                response = get_chat_response(birth_data, user_question)
-                
-                # Add to chat history
-                add_to_chat_history(user_question, response)
-                
-                # Show the response
-                st.success("✨ Response received!")
-                with st.container():
-                    st.write(f"**🙋 Your Question:** {user_question}")
-                    st.write(f"**🔮 Astrologer's Answer:**")
-                    st.markdown(response)
-                
-                # Rerun to update chat history display
-                st.rerun()
+    col_submit, col_clear = st.columns([3, 1])
+    with col_submit:
+        if st.button("🔮 Get Answer", type="primary", key="submit_question", disabled=not user_question.strip()):
+            if user_question.strip():
+                with st.spinner("🔮 Consulting the stars..."):
+                    # Get AI response
+                    response = get_chat_response(birth_data, user_question)
+                    
+                    # Add to chat history
+                    add_to_chat_history(user_question, response)
+                    
+                    # Show the response
+                    st.success("✨ Response received!")
+                    with st.container():
+                        st.write(f"**🙋 Your Question:** {user_question}")
+                        st.write(f"**🔮 Astrologer's Answer:**")
+                        st.markdown(response)
+                    
+                    # Rerun to update chat history display
+                    st.rerun()
+    
+    with col_clear:
+        if st.button("🔄 Clear Chat", key="clear_chat_btn"):
+            clear_chat_history()
+            st.rerun()
 
 def render_chat_sidebar_info():
     """Render chat information in sidebar"""

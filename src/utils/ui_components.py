@@ -40,7 +40,7 @@ def render_sidebar_navigation():
         st.switch_page("streamlit_app.py")
     if st.sidebar.button("📊 Birth Chart", use_container_width=True, key="nav_birth_chart"):
         st.switch_page("pages/02_Birth_Chart.py")
-    if st.sidebar.button("🔮 Predictions", use_container_width=True, key="nav_predictions"):
+    if st.sidebar.button("🔮 Astro Chat", use_container_width=True, key="nav_predictions"):
         st.switch_page("pages/03_Predictions.py")
     if st.sidebar.button("💫 Dasha Analysis", use_container_width=True, key="nav_dasha"):
         st.switch_page("pages/04_Dasha_Analysis.py")
@@ -129,7 +129,7 @@ def render_features_overview():
     features = {
         "🏠 Home": "Welcome page and quick start",
         "📊 Birth Chart": "Detailed natal chart calculation and display",
-        "🔮 Predictions": "Past, present, and future life analysis", 
+        "🔮 Astro Chat": "Past, present, and future life analysis", 
         "💫 Dasha Analysis": "Planetary period predictions",
         "🌟 Transit Analysis": "Current planetary influences",
         "💎 Remedies": "Personalized remedial measures",

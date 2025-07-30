@@ -45,62 +45,14 @@ def render_predictions_content(birth_data):
         st.info(quick_prediction)
         st.markdown("---")
     
-    # Create tabs for different prediction modes
-    tab1, tab2 = st.tabs(["📋 Detailed Analysis", "💬 Interactive Chat"])
-    
-    with tab1:
-        render_detailed_prediction_tab(birth_data)
-    
-    with tab2:
-        render_interactive_chat(birth_data)
-
-def render_detailed_prediction_tab(birth_data):
-    """Render the detailed prediction tab"""
-    st.subheader("📋 Comprehensive Astrological Analysis")
-    st.write("Get a complete written analysis of your birth chart covering all major life areas.")
-    
-    # Center the generate button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("Generate Detailed Analysis", type="primary", key="detailed_prediction_btn"):
-            with st.spinner("🔮 Generating comprehensive astrological analysis..."):
-                detailed_prediction = generate_detailed_prediction(birth_data)
-                st.session_state.detailed_prediction = detailed_prediction
-    
-    # Show detailed prediction if available
-    if hasattr(st.session_state, 'detailed_prediction') and st.session_state.detailed_prediction:
-        st.markdown("---")
-        st.subheader("🔬 Your Detailed Astrological Analysis")
-        
-        # Use container to handle long content properly
-        with st.container():
-            # Display the prediction in a more readable format
-            prediction_text = st.session_state.detailed_prediction
-            
-            # Handle potential markdown formatting
-            if prediction_text:
-                st.markdown(prediction_text)
-            else:
-                st.error("No prediction content generated. Please try again.")
-        
-        # Add option to regenerate and navigate to chat
-        st.markdown("---")
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col1:
-            if st.button("🔄 Regenerate Analysis", key="regen_detailed"):
-                del st.session_state.detailed_prediction
-                st.rerun()
-        with col2:
-            if st.button("💾 Save Analysis", key="save_detailed"):
-                st.success("Analysis saved to session!")
-        with col3:
-            st.info("💡 Switch to the 'Interactive Chat' tab to ask specific questions!")
+    # Render interactive chat directly
+    render_interactive_chat(birth_data)
 
 def main():
     page_config = {
-        'title': '🔮 Astrological Predictions',
-        'icon': '🔮',
-        'subtitle': 'Comprehensive Analysis & Interactive Chat',
+        'title': '� Talk to Astrologer',
+        'icon': '�',
+        'subtitle': 'Interactive Astrological Consultation & Chat',
         'content_callback': render_predictions_content,
         'page_id': 'predictions'
     }
