@@ -9,7 +9,7 @@ from .common import (
 
 def render_sidebar_navigation():
     """Render sidebar navigation menu"""
-    # Hide default Streamlit navigation
+    # Hide default Streamlit navigation and sidebar header elements
     st.markdown("""
     <style>
     div[data-testid="stSidebarNav"] {
@@ -18,12 +18,23 @@ def render_sidebar_navigation():
     div[data-testid="stSidebarNavSeparator"] {
         display: none;
     }
+    /* Hide sidebar header completely */
+    div[data-testid="stSidebarHeader"] {
+        display: none !important;
+    }
+    /* Hide logo spacer */
+    div[data-testid="stLogoSpacer"] {
+        display: none !important;
+    }
+    /* Hide sidebar collapse button */
+    div[data-testid="stSidebarCollapseButton"] {
+        display: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
     
     st.sidebar.title("🌟 Navigation")
-    st.sidebar.markdown("---")
-    
+        
     # Navigation buttons with unique keys
     if st.sidebar.button("🏠 Home", use_container_width=True, key="nav_home"):
         st.switch_page("streamlit_app.py")
