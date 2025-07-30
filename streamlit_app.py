@@ -30,11 +30,58 @@ st.set_page_config(
 )
 
 def main():
-    """Main application function"""
+    """Main application function with balanced spacing"""
     # Initialize app
     load_custom_css()
     initialize_session_state()
     validate_environment()
+    
+    # Add balanced spacing CSS
+    st.markdown("""
+    <style>
+    /* High specificity selectors to override Streamlit defaults */
+    section[data-testid="stMain"] .main .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* Target the main block container directly */
+    .stMainBlockContainer.block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* Reduce spacing between elements with high specificity */
+    div[data-testid="stVerticalBlock"] div[data-testid="stElementContainer"] {
+        margin-bottom: 0.3rem !important;
+        margin-top: 0rem !important;
+    }
+    
+    /* Target specific emotion cache classes from the HTML */
+    .st-emotion-cache-v3w3zg.e1msl4mp0 {
+        margin-bottom: 0.3rem !important;
+        margin-top: 0rem !important;
+    }
+    
+    /* First element should start closer to top */
+    div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"]:first-child {
+        margin-top: 0rem !important;
+    }
+    
+    /* Compact headers with higher specificity */
+    div[data-testid="stMarkdownContainer"] h1,
+    div[data-testid="stMarkdownContainer"] h2,
+    div[data-testid="stMarkdownContainer"] h3 {
+        margin-top: 0.2rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+    
+    /* Reduce alert spacing with high specificity */
+    div[data-testid="stAlert"] {
+        margin: 0.2rem 0 0.4rem 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # Render UI components
     render_sidebar_navigation()

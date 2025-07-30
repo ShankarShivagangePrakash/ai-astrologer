@@ -10,3 +10,109 @@ div[data-testid="stSidebarNav"] {
 div[data-testid="stSidebarNavSeparator"] {
     display: none;
 }
+
+/* BALANCED SPACING OPTIMIZATION */
+
+/* Reduce main container padding while maintaining readability */
+.main .block-container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+}
+
+/* Target specific Streamlit container classes */
+.stMainBlockContainer {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+/* More specific targeting for element containers */
+div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] {
+    margin-top: 0rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+/* Reduce element spacing between components */
+.element-container {
+    margin-top: 0rem !important;
+    margin-bottom: 0.3rem !important;
+}
+
+/* Target specific emotion cache classes */
+.st-emotion-cache-v3w3zg {
+    margin-bottom: 0.3rem !important;
+}
+
+/* Compact headers with minimal spacing */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.2 !important;
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+}
+
+/* Reduce markdown element spacing */
+.stMarkdown {
+    margin-top: 0rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+}
+
+/* Compact form elements */
+.stTextInput, .stSelectbox, .stDateInput {
+    margin-bottom: 0.5rem !important;
+}
+
+.stTextInput > div > div > input,
+.stSelectbox > div > div > div,
+.stDateInput > div > div > input {
+    padding: 0.375rem 0.75rem !important;
+}
+
+/* Compact buttons */
+.stButton > button {
+    padding: 0.375rem 0.75rem !important;
+    margin: 0.25rem 0 !important;
+}
+
+/* Reduce alert box spacing */
+.stAlert {
+    padding: 0.5rem 0.75rem !important;
+    margin: 0.25rem 0 0.5rem 0 !important;
+}
+
+/* Compact expander sections */
+.streamlit-expanderHeader {
+    padding: 0.5rem 0.75rem !important;
+}
+
+.streamlit-expanderContent {
+    padding: 0.75rem !important;
+}
+
+/* Minimize column gaps */
+.css-ocqkz7 {
+    gap: 0.5rem !important;
+}
+
+/* Reduce sidebar padding */
+.css-1d391kg {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+
+/* Remove excessive top margin from first element */
+.element-container:first-child {
+    margin-top: 0rem !important;
+}
+
+/* Compact the last element bottom margin */
+.element-container:last-child {
+    margin-bottom: 0.5rem !important;
+}

@@ -129,10 +129,10 @@ def render_features_overview():
         st.write(f"**{feature}**: {description}")
 
 def render_footer():
-    """Render footer section"""
+    """Render footer section with balanced spacing"""
     st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; color: #666; padding: 20px;'>
+    <div style='text-align: center; color: #666; padding: 10px 0;'>
         <p>⭐ Powered by AI | Based on Classical Vedic Astrology ⭐</p>
         <p>© 2025 Vedic Astrologer App - Ancient Wisdom, Modern Technology</p>
     </div>
