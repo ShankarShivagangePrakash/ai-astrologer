@@ -27,26 +27,6 @@ def render_interactive_chat(birth_data):
     # Question input
     st.write("### ❓ Ask Your Question")
     
-    # Suggested questions
-    with st.expander("💡 Suggested Questions", expanded=not chat_messages):
-        suggested_questions = [
-            "What are my strongest personality traits according to my chart?",
-            "What career path would be most suitable for me?",
-            "When is the best time for marriage or relationships?",
-            "What should I focus on for better health and well-being?",
-            "What is my spiritual path and life purpose?",
-            "What are the major periods coming up in my life?",
-            "Which gemstones or remedies would benefit me?",
-            "What are my lucky days and colors?"
-        ]
-        
-        cols = st.columns(2)
-        for i, question in enumerate(suggested_questions):
-            col = cols[i % 2]
-            with col:
-                if st.button(f"📋 {question}", key=f"suggested_{i}", use_container_width=True):
-                    st.session_state.suggested_question = question
-    
     # Question input field
     user_question = st.text_input(
         "Type your question:", 

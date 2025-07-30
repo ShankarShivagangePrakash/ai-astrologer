@@ -50,8 +50,8 @@ def render_predictions_content(birth_data):
 
 def main():
     page_config = {
-        'title': '� Talk to Astrologer',
-        'icon': '�',
+        'title': '💬 Talk to Astrologer',
+        'icon': '💬',
         'subtitle': 'Interactive Astrological Consultation & Chat',
         'content_callback': render_predictions_content,
         'page_id': 'predictions'
