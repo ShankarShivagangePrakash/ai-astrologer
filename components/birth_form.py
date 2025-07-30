@@ -58,7 +58,7 @@ def render_birth_form():
                     "Minute", 
                     options=list(range(0, 60)),
                     index=0,
-                    format_func=lambda x: f":{x:02d}"
+                    format_func=lambda x: f"{x:02d}"
                 )
         
         with col2:

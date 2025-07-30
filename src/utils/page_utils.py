@@ -53,16 +53,53 @@ def check_birth_data_and_render(content_callback, page_title="this page"):
         # Birth data exists, render the content
         st.success("✅ Birth data available for analysis!")
         
-        # Show birth data summary in an expander
-        with st.expander("📋 View Birth Data", expanded=False):
-            col1, col2 = st.columns(2)
-            with col1:
-                st.write(f"**📅 Date:** {birth_data.get('date', 'Unknown')}")
+        # Show birth data summary with header
+        st.subheader("📋 Birth Information")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            # Date information
+            date_str = birth_data.get('date', 'Unknown')
+            if hasattr(date_str, 'strftime'):
+                date_str = date_str.strftime('%Y-%m-%d')
+            st.write(f"**📅 Date:** {date_str}")
+            
+            # Location information - handle both old and new formats
+            if isinstance(birth_data.get('location'), dict):
+                location_data = birth_data['location']
+                city = location_data.get('city', '')
+                state = location_data.get('state', '')
+                country = location_data.get('country', '')
+                place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
+                st.write(f"**� Place:** {place_str}")
+                
+                # Show coordinates if available
+                if coordinates := location_data.get('coordinates'):
+                    st.write(f"**🌍 Latitude:** {coordinates['latitude']:.6f}°")
+                    st.write(f"**🌍 Longitude:** {coordinates['longitude']:.6f}°")
+                    
+                    # Show formatted address if available
+                    if formatted_address := coordinates.get('formatted_address'):
+                        st.caption(f"*Verified as: {formatted_address}*")
+            else:
+                # Backward compatibility with old string format
                 st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
-            with col2:
-                st.write(f"**⏰ Time:** {birth_data.get('time', 'Unknown')}")
-                if birth_data.get('hour') is not None:
-                    st.write(f"**🕐 Precise:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
+                
+        with col2:
+            # Time information
+            time_str = birth_data.get('time', 'Unknown')
+            if hasattr(time_str, 'strftime'):
+                time_str = time_str.strftime('%H:%M:%S')
+            st.write(f"**⏰ Time:** {time_str}")
+            
+            # Precise time
+            if birth_data.get('hour') is not None:
+                st.write(f"**🕐 Precise Time:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
+            
+            # Timezone offset
+            if birth_data.get('timezone_offset') is not None:
+                offset = birth_data['timezone_offset']
+                st.write(f"**🌐 Timezone Offset:** {offset:+.1f} hours from UTC")
         
         st.markdown("---")
         content_callback(birth_data)
