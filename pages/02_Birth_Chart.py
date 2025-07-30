@@ -9,10 +9,8 @@ from components.VedicHoroscopeGenerator import create_kundali_widget
 
 def render_birth_chart_content(birth_data):
     """Render birth chart specific content"""
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        create_birth_info_display(birth_data)
+    # Center the chart generation content
+    col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
         # Chart calculation options
@@ -25,7 +23,6 @@ def render_birth_chart_content(birth_data):
         )
         
         if chart_type == "Generate Vedic Horoscope":
-            st.info("🔬 High-precision astronomical calculations")
             positions = create_kundali_widget(birth_data)
             
             if positions:

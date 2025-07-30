@@ -101,7 +101,6 @@ def check_birth_data_and_render(content_callback, page_title="this page"):
                 offset = birth_data['timezone_offset']
                 st.write(f"**🌐 Timezone Offset:** {offset:+.1f} hours from UTC")
         
-        st.markdown("---")
         content_callback(birth_data)
     else:
         # No birth data, show compact warning

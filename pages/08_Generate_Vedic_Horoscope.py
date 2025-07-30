@@ -236,49 +236,8 @@ def render_vedic_horoscope_content(birth_data):
     from components.VedicHoroscopeGenerator import create_kundali_widget, VedicHoroscopeGenerator
     from components.birth_data_display import render_coordinates_status
     
-    # Display birth data info with enhanced location display
-    st.subheader("📋 Birth Information")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.write(f"**📅 Date:** {birth_data.get('date', 'Unknown')}")
-        
-        # Handle enhanced location display
-        if isinstance(birth_data.get('location'), dict):
-            location_data = birth_data['location']
-            city = location_data.get('city', '')
-            state = location_data.get('state', '')
-            country = location_data.get('country', '')
-            place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
-            st.write(f"**📍 Place:** {place_str}")
-            
-            if coordinates := location_data.get('coordinates'):
-                st.write(f"**🌍 Latitude:** {coordinates['latitude']:.6f}°")
-                st.write(f"**🌍 Longitude:** {coordinates['longitude']:.6f}°")
-                
-                # Show verified address
-                if formatted_address := coordinates.get('formatted_address'):
-                    st.caption(f"*Verified as: {formatted_address}*")
-        else:
-            st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
-            st.caption("*⚠️ No coordinates available - using approximate location*")
-            
-    with col2:
-        st.write(f"**⏰ Time:** {birth_data.get('time', 'Unknown')}")
-        if birth_data.get('hour') is not None and birth_data.get('minute') is not None:
-            st.write(f"**🕐 Precise Time:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
-            
-        # Show timezone information if available
-        if birth_data.get('timezone_offset') is not None:
-            offset = birth_data['timezone_offset']
-            st.write(f"**🌐 Timezone Offset:** {offset:+.1f} hours from UTC")
-        else:
-            st.write(f"**🌐 Timezone:** Auto-detected from coordinates")
-    
     # Show coordinates status
-    st.markdown("---")
     render_coordinates_status()
-    st.markdown("---")
     
     # Chart options
     st.subheader("🎨 Chart Options")
@@ -291,13 +250,12 @@ def render_vedic_horoscope_content(birth_data):
         show_technical = st.checkbox("Show Technical Details", value=False)
     
     # Generate button
-    st.markdown("---")
+    
     if st.button("🚀 Generate Vedic Horoscope", type="primary", use_container_width=True):
         # Use the enhanced create_kundali_widget function
         positions = create_kundali_widget(birth_data)
         
         if positions:
-            st.markdown("---")
             
             # Additional detailed information if requested
             if show_positions:

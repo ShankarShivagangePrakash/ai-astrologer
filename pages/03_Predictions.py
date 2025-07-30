@@ -59,10 +59,8 @@ def render_detailed_prediction_tab(birth_data):
     st.subheader("📋 Comprehensive Astrological Analysis")
     st.write("Get a complete written analysis of your birth chart covering all major life areas.")
     
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        create_birth_info_display(birth_data)
-    
+    # Center the generate button
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("Generate Detailed Analysis", type="primary", key="detailed_prediction_btn"):
             with st.spinner("🔮 Generating comprehensive astrological analysis..."):
