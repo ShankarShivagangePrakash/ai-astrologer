@@ -11,7 +11,7 @@ def render_dasha_content(birth_data):
     
     with col1:
         render_coming_soon_section(
-            "� Current Dasha Information", 
+            "🕐 Current Dasha Information", 
             [
                 "Current Mahadasha period and effects",
                 "Current Antardasha period analysis", 
@@ -22,7 +22,7 @@ def render_dasha_content(birth_data):
     
     with col2:
         render_coming_soon_section(
-            "� Dasha Timeline",
+            "🕐 Dasha Timeline",
             [
                 "Complete Vimshottari Dasha timeline",
                 "Past, present, and future periods",

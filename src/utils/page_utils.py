@@ -1,6 +1,9 @@
 """
 Common page utilities to eliminate duplication across all pages.
-This module handles common page setup, navigation, and data checks.
+Thi                place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
+                st.write(f"**📍 Place:** {place_str}")
+                
+                # Show coordinates if availabledule handles common page setup, navigation, and data checks.
 """
 
 import streamlit as st
@@ -71,7 +74,7 @@ def check_birth_data_and_render(content_callback, page_title="this page"):
                 state = location_data.get('state', '')
                 country = location_data.get('country', '')
                 place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
-                st.write(f"**� Place:** {place_str}")
+                st.write(f"**📍 Place:** {place_str}")
                 
                 # Show coordinates if available
                 if coordinates := location_data.get('coordinates'):
