@@ -158,7 +158,7 @@ def render_location_inputs(default_city="", default_state="", default_country=""
         state = st.text_input(
             "State/Province", 
             value=default_state,
-            placeholder="e.g., Maharashtra, CA",
+            placeholder="e.g., Maharashtra, New York",
             help="Enter state or province (optional but recommended)"
         )
     
