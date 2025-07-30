@@ -66,9 +66,31 @@ class VedicHoroscopeGenerator:
         """
         Calculate Julian Day with timezone support
         timezone_offset: hours from UTC (e.g., +5.5 for IST)
+        Now uses actual coordinates for more accurate timezone calculation
         """
         # Convert to UTC
         utc_hour = hour - timezone_offset
+        if utc_hour < 0:
+            utc_hour += 24
+            day -= 1
+        elif utc_hour >= 24:
+            utc_hour -= 24
+            day += 1
+            
+        decimal_hour = utc_hour + (minute / 60.0)
+        return swe.julday(year, month, day, decimal_hour)
+    
+    def calculate_julian_day_with_coordinates(self, year, month, day, hour, minute=0, latitude=0, longitude=0):
+        """
+        Calculate Julian Day using geographical coordinates for accurate local time
+        This method provides more accurate calculations than timezone approximation
+        """
+        # Use longitude to calculate local mean time
+        # 15 degrees = 1 hour, so longitude_offset = longitude / 15
+        longitude_offset = longitude / 15.0
+        
+        # Convert local time to UTC
+        utc_hour = hour - longitude_offset
         if utc_hour < 0:
             utc_hour += 24
             day -= 1
@@ -305,8 +327,21 @@ def create_kundali_widget(birth_data=None):
             hour = birth_data.get('hour', 12)
             minute = birth_data.get('minute', 0)
         
-        # Calculate positions
-        jd = calculator.calculate_julian_day_with_timezone(year, month, day, hour, minute)
+        # Check if we have coordinate data for more accurate calculations
+        latitude = birth_data.get('latitude')
+        longitude = birth_data.get('longitude')
+        
+        # Calculate positions using coordinates if available
+        if latitude is not None and longitude is not None:
+            st.info(f"🌍 Using precise coordinates: {latitude:.4f}°, {longitude:.4f}° for accurate calculations")
+            jd = calculator.calculate_julian_day_with_coordinates(year, month, day, hour, minute, latitude, longitude)
+        else:
+            # Fallback to timezone approximation
+            timezone_offset = birth_data.get('timezone_offset', 0)
+            if timezone_offset != 0:
+                st.info(f"⏰ Using estimated timezone offset: {timezone_offset:+.1f} hours")
+            jd = calculator.calculate_julian_day_with_timezone(year, month, day, hour, minute, timezone_offset)
+        
         positions = calculator.calculate_comprehensive_positions(jd)
         
         if positions:

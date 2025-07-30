@@ -66,19 +66,39 @@ def has_session_data(key):
 # BIRTH DATA UTILITIES
 # =============================================================================
 
-def create_birth_data_dict(birth_date, birth_time, birth_place, hour=None, minute=None):
-    """Create standardized birth data dictionary"""
-    return {
+def create_birth_data_dict(birth_date, birth_time, location_data, hour=None, minute=None):
+    """Create standardized birth data dictionary with enhanced location support"""
+    birth_data = {
         'date': birth_date,
         'time': birth_time,
-        'place': birth_place,
         'hour': hour if hour is not None else birth_time.hour,
         'minute': minute if minute is not None else birth_time.minute,
         'timestamp': datetime.combine(birth_date, birth_time)
     }
+    
+    # Handle both old format (string) and new format (dict) for location
+    if isinstance(location_data, dict):
+        birth_data.update({
+            'location': location_data,
+            'place': location_data.get('place_string', ''),  # For backward compatibility
+            'city': location_data.get('city', ''),
+            'state': location_data.get('state', ''),
+            'country': location_data.get('country', ''),
+            'latitude': location_data.get('latitude'),
+            'longitude': location_data.get('longitude'),
+            'timezone_offset': location_data.get('timezone_offset', 0)
+        })
+    else:
+        # Backward compatibility with old string format
+        birth_data.update({
+            'place': location_data or '',
+            'location': {'place_string': location_data or ''}
+        })
+    
+    return birth_data
 
-def validate_birth_inputs(birth_date, birth_time, birth_place):
-    """Comprehensive birth data validation"""
+def validate_birth_inputs(birth_date, birth_time, location_data):
+    """Comprehensive birth data validation with enhanced location support"""
     errors = []
     
     # Date validation
@@ -91,29 +111,62 @@ def validate_birth_inputs(birth_date, birth_time, birth_place):
     if not birth_time:
         errors.append("Birth time is required")
     
-    # Place validation
-    if not birth_place or len(birth_place.strip()) < 2:
-        errors.append("Please enter a valid birth place (minimum 2 characters)")
+    # Location validation - handle both old and new formats
+    if isinstance(location_data, dict):
+        if not location_data.get('city'):
+            errors.append("City is required")
+        if not location_data.get('country'):
+            errors.append("Country is required")
+        # Note: We don't require coordinates here as they'll be fetched automatically
+    else:
+        # Backward compatibility with old string format
+        if not location_data or len(str(location_data).strip()) < 2:
+            errors.append("Please enter a valid birth place (minimum 2 characters)")
     
     return errors
 
 def get_birth_data_summary():
-    """Get formatted summary of current birth data"""
+    """Get formatted summary of current birth data with enhanced location support"""
     birth_data = get_session_value('birth_data', {})
     if not birth_data:
         return "No birth data saved"
     
     date_str = birth_data.get('date', 'Unknown').strftime('%d/%m/%Y') if birth_data.get('date') else 'Unknown'
     time_str = birth_data.get('time', 'Unknown').strftime('%H:%M') if birth_data.get('time') else 'Unknown'
-    place_str = birth_data.get('place', 'Unknown')
+    
+    # Handle both old and new location formats
+    if isinstance(birth_data.get('location'), dict):
+        location_data = birth_data['location']
+        city = location_data.get('city', '')
+        state = location_data.get('state', '')
+        country = location_data.get('country', '')
+        place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
+        
+        if coordinates := location_data.get('coordinates'):
+            place_str += f" ({coordinates['latitude']:.2f}°, {coordinates['longitude']:.2f}°)"
+    else:
+        place_str = birth_data.get('place', 'Unknown')
     
     return f"📅 {date_str} ⏰ {time_str} 📍 {place_str}"
 
 def is_birth_data_complete():
-    """Check if complete birth data is available"""
+    """Check if complete birth data is available with enhanced location support"""
     birth_data = get_session_value(SESSION_KEYS['BIRTH_DATA'], {})
-    required_fields = ['date', 'time', 'place']
-    return all(birth_data.get(field) for field in required_fields)
+    required_fields = ['date', 'time']
+    
+    # Check basic required fields
+    if not all(birth_data.get(field) for field in required_fields):
+        return False
+    
+    # Check location data
+    location_data = birth_data.get('location')
+    if isinstance(location_data, dict):
+        # New format - require city and country (coordinates are optional but preferred)
+        return (location_data.get('city') and 
+                location_data.get('country'))
+    else:
+        # Backward compatibility - check place field
+        return bool(birth_data.get('place'))
 
 def clear_session_data():
     """Clear all session data (useful for starting fresh)"""

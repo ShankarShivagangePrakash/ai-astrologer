@@ -1,4 +1,3 @@
-
 """
 Vedic Horoscope Generator - Streamlit Integration
 Direct implementation using pyswisseph for Vedic astrology
@@ -235,18 +234,50 @@ def render_vedic_horoscope_content(birth_data):
     """Render vedic horoscope generation content using session birth data"""
     # Import the enhanced component
     from components.VedicHoroscopeGenerator import create_kundali_widget, VedicHoroscopeGenerator
+    from components.birth_data_display import render_coordinates_status
     
-    # Display birth data info
-    st.subheader("� Birth Information")
+    # Display birth data info with enhanced location display
+    st.subheader("📋 Birth Information")
     col1, col2 = st.columns(2)
+    
     with col1:
         st.write(f"**📅 Date:** {birth_data.get('date', 'Unknown')}")
-        st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
+        
+        # Handle enhanced location display
+        if isinstance(birth_data.get('location'), dict):
+            location_data = birth_data['location']
+            city = location_data.get('city', '')
+            state = location_data.get('state', '')
+            country = location_data.get('country', '')
+            place_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
+            st.write(f"**📍 Place:** {place_str}")
+            
+            if coordinates := location_data.get('coordinates'):
+                st.write(f"**🌍 Latitude:** {coordinates['latitude']:.6f}°")
+                st.write(f"**🌍 Longitude:** {coordinates['longitude']:.6f}°")
+                
+                # Show verified address
+                if formatted_address := coordinates.get('formatted_address'):
+                    st.caption(f"*Verified as: {formatted_address}*")
+        else:
+            st.write(f"**📍 Place:** {birth_data.get('place', 'Unknown')}")
+            st.caption("*⚠️ No coordinates available - using approximate location*")
+            
     with col2:
         st.write(f"**⏰ Time:** {birth_data.get('time', 'Unknown')}")
         if birth_data.get('hour') is not None and birth_data.get('minute') is not None:
             st.write(f"**🕐 Precise Time:** {birth_data.get('hour'):02d}:{birth_data.get('minute'):02d}")
+            
+        # Show timezone information if available
+        if birth_data.get('timezone_offset') is not None:
+            offset = birth_data['timezone_offset']
+            st.write(f"**🌐 Timezone Offset:** {offset:+.1f} hours from UTC")
+        else:
+            st.write(f"**🌐 Timezone:** Auto-detected from coordinates")
     
+    # Show coordinates status
+    st.markdown("---")
+    render_coordinates_status()
     st.markdown("---")
     
     # Chart options
@@ -294,11 +325,24 @@ def render_vedic_horoscope_content(birth_data):
                     calculator = VedicHoroscopeGenerator()
                     birth_date = birth_data['date']
                     birth_time = birth_data['time']
-                    jd = calculator.calculate_julian_day_with_timezone(
-                        birth_date.year, birth_date.month, birth_date.day,
-                        birth_time.hour, birth_time.minute
-                    )
-                    st.write(f"**Julian Day:** {jd:.6f}")
+                    
+                    # Show different JD calculations based on available data
+                    if birth_data.get('latitude') and birth_data.get('longitude'):
+                        jd = calculator.calculate_julian_day_with_coordinates(
+                            birth_date.year, birth_date.month, birth_date.day,
+                            birth_time.hour, birth_time.minute,
+                            birth_data['latitude'], birth_data['longitude']
+                        )
+                        st.write(f"**Julian Day (coordinates):** {jd:.6f}")
+                        st.write(f"**Calculation Method:** Using precise geographical coordinates")
+                    else:
+                        jd = calculator.calculate_julian_day_with_timezone(
+                            birth_date.year, birth_date.month, birth_date.day,
+                            birth_time.hour, birth_time.minute
+                        )
+                        st.write(f"**Julian Day (timezone):** {jd:.6f}")
+                        st.write(f"**Calculation Method:** Using timezone approximation")
+                    
                     st.write(f"**Total Planets:** {len(positions)}")
                     st.write(f"**Birth Coordinates:** Using session data")
         else:

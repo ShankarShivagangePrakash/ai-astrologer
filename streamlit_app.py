@@ -19,6 +19,7 @@ from src.utils.ui_components import (
     render_footer
 )
 from components.birth_form import render_birth_form
+from components.birth_data_display import render_birth_data_display
 
 # Page configuration
 st.set_page_config(
@@ -38,6 +39,11 @@ def main():
     # Render UI components
     render_sidebar_navigation()
     render_header()
+    
+    # Show saved birth data if available
+    if render_birth_data_display():
+        st.markdown("---")
+    
     render_how_it_works()
     render_birth_form()
     render_session_status()
