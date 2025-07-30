@@ -67,38 +67,36 @@ def check_birth_data_and_render(content_callback, page_title="this page"):
         st.markdown("---")
         content_callback(birth_data)
     else:
-        # No birth data, show enhanced warning
+        # No birth data, show compact warning
         st.error("🚫 **Birth Data Required**")
-        st.write(f"To access **{page_title}**, you need to save your birth details first.")
+        st.caption(f"To access **{page_title}**, save your birth details first.")
         
         col1, col2 = st.columns(2)
         with col1:
             st.info("""
-            **📝 Steps to get started:**
-            1. Click the "🏠 Home" button in the sidebar
-            2. Enter your birth date, time, and place
-            3. Click "💾 Save Birth Data"
-            4. Return to this page for analysis
+            **📝 Quick Steps:**
+            1. Go to Home page
+            2. Enter birth details
+            3. Click Save Birth Data
+            4. Return here
             """)
         
         with col2:
             st.warning("""
-            **⚠️ Why do we need this?**
-            
-            Vedic astrology requires precise birth information to:
-            - Calculate planetary positions
-            - Determine house placements  
-            - Generate accurate predictions
-            - Provide personalized analysis
+            **⚠️ Required for:**
+            • Planetary positions
+            • House placements  
+            • Accurate predictions
+            • Personalized analysis
             """)
         
-        # Enhanced navigation buttons
+        # Compact navigation buttons
         nav_col1, nav_col2 = st.columns(2)
         with nav_col1:
-            if st.button("🏠 Go to Home Page", type="primary", key=f"home_btn_{page_title}"):
+            if st.button("🏠 Go to Home", type="primary", key=f"home_btn_{page_title}"):
                 st.switch_page("streamlit_app.py")
         with nav_col2:
-            if st.button("🔄 Refresh Page", key=f"refresh_btn_{page_title}"):
+            if st.button("🔄 Refresh", key=f"refresh_btn_{page_title}"):
                 st.rerun()
 
 def create_birth_info_display(birth_data):
@@ -143,7 +141,7 @@ def render_standard_disclaimer():
 
 def create_standard_page_layout(page_config):
     """
-    Create a complete page with standard layout
+    Create a complete page with standard layout and balanced spacing
     
     Args:
         page_config: Dictionary with page configuration
@@ -157,6 +155,43 @@ def create_standard_page_layout(page_config):
     """
     # Setup page
     setup_page(page_config['title'], page_config['icon'])
+    
+    # Add balanced spacing CSS for this page
+    st.markdown("""
+    <style>
+    /* Balanced top and bottom spacing - not zero but reduced */
+    .main .block-container {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    /* Reduce spacing between elements while maintaining readability */
+    .element-container {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* First element should start closer to top */
+    .element-container:first-child {
+        margin-top: 0rem !important;
+    }
+    
+    /* Compact headers */
+    h1, h2, h3 {
+        margin-top: 0.25rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Reduce alert spacing */
+    .stAlert {
+        margin: 0.25rem 0 0.5rem 0 !important;
+    }
+    
+    /* Compact info boxes */
+    .stInfo, .stWarning, .stError, .stSuccess {
+        margin: 0.25rem 0 0.5rem 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # Render header
     render_page_header(page_config['title'], page_config['subtitle'])

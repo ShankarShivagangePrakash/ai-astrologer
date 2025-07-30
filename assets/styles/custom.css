@@ -15,34 +15,17 @@ div[data-testid="stSidebarNavSeparator"] {
 
 /* Reduce main container padding while maintaining readability */
 .main .block-container {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     max-width: 100% !important;
 }
 
-/* Target specific Streamlit container classes */
-.stMainBlockContainer {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
-}
-
-/* More specific targeting for element containers */
-div[data-testid="stVerticalBlock"] > div[data-testid="stElementContainer"] {
-    margin-top: 0rem !important;
-    margin-bottom: 0.3rem !important;
-}
-
 /* Reduce element spacing between components */
 .element-container {
     margin-top: 0rem !important;
-    margin-bottom: 0.3rem !important;
-}
-
-/* Target specific emotion cache classes */
-.st-emotion-cache-v3w3zg {
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 /* Compact headers with minimal spacing */
