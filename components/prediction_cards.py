@@ -1,1 +1,0 @@
-# Prediction display cards component
