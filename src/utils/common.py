@@ -212,39 +212,41 @@ def generate_ai_response(prompt, spinner_text="🔮 Generating response..."):
         return f"Unable to generate response at this time. Error: {str(e)}"
 
 def generate_fun_chat_rag_response(question, birth_data=None, session_id="fun_chat_default", spinner_text="🌟 Consulting the cosmic wisdom..."):
-    """Generate RAG-enhanced response specifically for Fun Chat"""
+    """Generate enhanced RAG response with agent and external tools for Fun Chat"""
     try:
-        # Import here to avoid circular imports and handle missing dependencies gracefully
-        from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
+        # Try enhanced RAG (with agent and external tools)
+        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
         
         with st.spinner(spinner_text):
-            rag_system = get_simple_fun_chat_rag()
-            if rag_system.is_available():
-                return rag_system.get_response(question, birth_data, session_id)
+            enhanced_rag = get_enhanced_fun_chat_rag()
+            if enhanced_rag.is_available():
+                return enhanced_rag.get_response(question, birth_data, session_id)
             else:
-                # Fallback to regular AI response with fun persona
+                # Fallback to regular AI response with Maha Prabhu persona
                 fallback_prompt = f"""
-                You are a fun, engaging, and wise Vedic astrology chatbot with a playful personality. 
+                You are Maha Prabhu, a fun, engaging, and wise Vedic astrology guru with a playful personality. 
                 Answer the user's question in an entertaining yet informative way.
                 
                 User Question: {question}
                 
                 Guidelines for your response:
-                1. Be fun, conversational, and engaging 
-                2. Use emojis and creative language
-                3. Include relevant astrological insights when applicable
-                4. Keep it light-hearted but educational
-                5. Use analogies, metaphors, and storytelling when appropriate
-                6. Add a touch of humor while respecting the wisdom of astrology
+                1. Start with "Hey Dude," as your signature greeting
+                2. Be fun, conversational, and engaging 
+                3. Use emojis and creative language (🌟✨🔮🚀🌙💫)
+                4. Include relevant astrological insights when applicable
+                5. Keep it light-hearted but educational
+                6. Use analogies, metaphors, and storytelling when appropriate
+                7. Add a touch of humor while respecting the wisdom of astrology
+                8. End with mystical encouragement to ask more questions
                 
-                Make your response engaging, informative, and fun to read!
+                Make your response engaging, informative, and fun to read as Maha Prabhu!
                 """
                 return generate_ai_response(fallback_prompt, spinner_text)
                 
     except ImportError:
-        # If RAG dependencies aren't available, use regular AI response
+        # If enhanced RAG dependencies aren't available, use regular AI response
         fallback_prompt = f"""
-        You are a fun, engaging, and wise Vedic astrology chatbot with a playful personality. 
+        You are Maha Prabhu, a fun, engaging, and wise Vedic astrology guru with a playful personality. 
         Answer the user's question in an entertaining yet informative way.
         
         User Question: {question}

@@ -7,6 +7,8 @@ langchain-community
 langchain-chroma
 chromadb
 requests
+wikipedia
+duckduckgo-search
 
 pyswisseph==2.10.3.2
 skyfield==1.48

@@ -171,19 +171,24 @@ def render_fun_chat_sidebar_info():
         st.markdown("---")
         st.write("### 🎉 Fun Astro Chat")
         
-        # Check RAG system status
+        # Check Enhanced RAG system status
+        system_status = "🌟 Standard AI Mode"
+        system_details = "Using enhanced AI responses"
+        
         try:
-            from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
-            rag_system = get_simple_fun_chat_rag()
-            if rag_system.is_available():
-                st.success("🧠 RAG Knowledge Base: Active")
-                st.caption(f"Using Maha Prabhu's wisdom ({len(rag_system.knowledge_base)} Q&A pairs)")
+            from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
+            enhanced_rag = get_enhanced_fun_chat_rag()
+            if enhanced_rag.is_available():
+                system_status = "🤖 Enhanced Agent Mode"
+                system_details = f"RAG + Wikipedia + Web Search ({len(enhanced_rag.knowledge_base)} Q&A pairs)"
+                st.success(f"{system_status}: Active")
+                st.caption(system_details)
             else:
                 st.warning("⚡ Basic AI Mode: Active")
-                st.caption("RAG system unavailable, using standard responses")
-        except Exception:
-            st.info("🌟 Standard AI Mode: Active")
-            st.caption("Using enhanced AI responses")
+                st.caption("Enhanced RAG unavailable, using standard responses")
+        except ImportError:
+            st.info(f"{system_status}: Active")
+            st.caption(system_details)
         
         chat_messages = get_fun_chat_history()
         
@@ -223,15 +228,33 @@ def main():
     st.markdown("### Chat with Maha Prabhu's AI Wisdom in a Fun Way!")
     
     # Add RAG status info
+    system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
+    
     try:
-        from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
-        rag_system = get_simple_fun_chat_rag()
-        if rag_system.is_available():
-            st.info(f"🧠 **Enhanced with Knowledge Base:** I have {len(rag_system.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom!")
+        # Check for Enhanced RAG
+        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
+        enhanced_rag = get_enhanced_fun_chat_rag()
+        if enhanced_rag.is_available():
+            system_info = f"🤖 **Enhanced Agent Mode:** I have {len(enhanced_rag.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom + Wikipedia + Web Search!"
         else:
-            st.info("🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!")
-    except Exception:
-        st.info("🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!")
+            system_info = "🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!"
+    except ImportError:
+        system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
+    
+    st.info(system_info)
+    
+    try:
+        # Check for Enhanced RAG
+        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
+        enhanced_rag = get_enhanced_fun_chat_rag()
+        if enhanced_rag.is_available():
+            system_info = f"🤖 **Enhanced Agent Mode:** I have {len(enhanced_rag.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom + Wikipedia + Web Search!"
+        else:
+            system_info = "🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!"
+    except ImportError:
+        system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
+    
+    st.info(system_info)
     
     # Get birth data silently (for AI use, but don't display it)
     birth_data = get_session_value(SESSION_KEYS['BIRTH_DATA'], {})
