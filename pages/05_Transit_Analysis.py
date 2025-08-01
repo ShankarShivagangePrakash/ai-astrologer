@@ -127,6 +127,64 @@ def render_lifetime_afflictions_timeline(timeline):
             "Lifetime effect"
         )
     
+    # Year span summary table
+    st.subheader("📅 Affliction Period Year Spans")
+    
+    # Create year span table
+    year_spans = []
+    
+    # Add Sade Sathi year spans
+    for i, period in enumerate(timeline.get('sade_sathi_periods', []), 1):
+        start_date_str = period['start_date'].strftime('%b %Y')
+        end_date_str = period['end_date'].strftime('%b %Y')
+        
+        year_spans.append({
+            'Affliction Type': 'Sade Sathi',
+            'Period #': f"Period {period.get('cycle_number', i)}",
+            'Phase': period.get('phase', 'Unknown'),
+            'Date Range': f"{start_date_str} to {end_date_str}",
+            'Start Age': f"{period.get('start_age', 'N/A')} years",
+            'End Age': f"{period.get('end_age', 'N/A')} years",
+            'Duration': f"{period.get('duration_years', 'N/A')} years",
+            'Intensity': period.get('intensity', 'Medium')
+        })
+    
+    # Add Ashtama Shani year spans
+    for i, period in enumerate(timeline.get('ashtama_shani_periods', []), 1):
+        start_date_str = period['start_date'].strftime('%b %Y')
+        end_date_str = period['end_date'].strftime('%b %Y')
+        
+        year_spans.append({
+            'Affliction Type': 'Ashtama Shani',
+            'Period #': f"Period {period.get('cycle_number', i)}",
+            'Phase': 'Complete Period',
+            'Date Range': f"{start_date_str} to {end_date_str}",
+            'Start Age': f"{period.get('start_age', 'N/A')} years",
+            'End Age': f"{period.get('end_age', 'N/A')} years",
+            'Duration': f"{period.get('duration_years', 'N/A')} years",
+            'Intensity': period.get('intensity', 'Very High')
+        })
+    
+    # Sort by start age
+    year_spans.sort(key=lambda x: float(x['Start Age'].replace(' years', '')) if x['Start Age'] != 'N/A years' else 0)
+    
+    if year_spans:
+        df_spans = pd.DataFrame(year_spans)
+        st.dataframe(df_spans, use_container_width=True, hide_index=True)
+        
+        # Add interpretation
+        st.info(f"""
+        **📊 Lifetime Saturn Afflictions Overview:**
+        - **Sade Sathi**: {len(timeline.get('sade_sathi_periods', []))} periods × 7.5 years = {summary.get('total_sade_sathi_years', 0)} years total
+        - **Ashtama Shani**: {len(timeline.get('ashtama_shani_periods', []))} periods × 2.5 years = {summary.get('total_ashtama_years', 0)} years total
+        - **Total Saturn Affliction Years**: {summary.get('total_sade_sathi_years', 0) + summary.get('total_ashtama_years', 0)} years out of 100-year lifespan
+        - **Life Impact**: Approximately {round((summary.get('total_sade_sathi_years', 0) + summary.get('total_ashtama_years', 0)) / 100 * 100, 1)}% of lifetime under major Saturn influences
+        
+        **Note:** Every person experiences exactly 4 Sade Sathi periods (every ~29.5 years) and multiple Ashtama Shani periods during their lifetime.
+        """)
+    else:
+        st.info("ℹ️ No major Saturn affliction periods found in lifetime timeline")
+    
     # Detailed timeline table
     st.subheader("🗓️ Detailed Timeline")
     

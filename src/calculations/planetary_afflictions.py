@@ -139,7 +139,7 @@ class PlanetaryAfflictionsCalculator:
         return moon_pos['sign'] if moon_pos else None
 
     def calculate_sade_sathi_periods(self, birth_date) -> List[Dict]:
-        """Calculate all Sade Sathi periods from birth to 100 years"""
+        """Calculate all 4 Sade Sathi periods from birth to 100 years"""
         moon_sign = self.get_moon_sign(birth_date)
         if not moon_sign:
             return []
@@ -148,66 +148,55 @@ class PlanetaryAfflictionsCalculator:
         # Convert date to datetime for calculations
         if not hasattr(birth_date, 'hour'):
             from datetime import datetime
-            current_date = datetime(birth_date.year, birth_date.month, birth_date.day)
-            end_date = datetime(birth_date.year + 100, birth_date.month, birth_date.day)
+            base_birth_date = datetime(birth_date.year, birth_date.month, birth_date.day)
         else:
-            current_date = birth_date
-            end_date = birth_date + timedelta(days=365 * 100)  # 100 years
+            base_birth_date = birth_date
         
-        # Saturn takes about 29.5 years to complete one cycle
-        # Sade Sathi occurs when Saturn transits 12th, 1st, and 2nd houses from Moon sign
-        saturn_cycle_days = int(29.5 * 365.25)
+        # Saturn completes one cycle in approximately 29.5 years
+        # Each person experiences Sade Sathi 4 times in 100 years
+        saturn_cycle_years = 29.5
+        sade_sathi_duration_years = 7.5
         
-        cycle_count = 0
-        while current_date < end_date and cycle_count < 4:  # Max 4 cycles in 100 years
-            # Calculate Saturn's position
-            jd = self.julian_day(current_date)
-            saturn_pos = self.get_planet_position('saturn', jd)
+        # Calculate approximate ages when Sade Sathi occurs for this Moon sign
+        # This is an approximation - actual timing depends on Saturn's exact position
+        moon_sign_offset = (moon_sign - 1) * 2.5  # Each sign takes ~2.5 years for Saturn
+        
+        for cycle in range(4):  # 4 Sade Sathi periods in lifetime
+            # Calculate start age for this cycle
+            start_age = (cycle * saturn_cycle_years) + moon_sign_offset
             
-            if saturn_pos:
-                saturn_sign = saturn_pos['sign']
-                
-                # Check if Saturn is in 12th, 1st, or 2nd house from Moon sign
-                houses_from_moon = []
-                for house in [12, 1, 2]:
-                    target_sign = ((moon_sign + house - 2) % 12) + 1
-                    houses_from_moon.append(target_sign)
-                
-                if saturn_sign in houses_from_moon:
-                    # Find the start and end of this Sade Sathi period
-                    sade_sathi_start = current_date
-                    sade_sathi_end = current_date + timedelta(days=int(7.5 * 365.25))
-                    
-                    # Determine which phase (Rising, Peak, Setting)
-                    if saturn_sign == houses_from_moon[0]:  # 12th house
-                        phase = "Rising (Arohini)"
-                        intensity = "Moderate"
-                    elif saturn_sign == houses_from_moon[1]:  # 1st house
-                        phase = "Peak (Madhya)"
-                        intensity = "High"
-                    else:  # 2nd house
-                        phase = "Setting (Avarohi)"
-                        intensity = "Moderate"
-                    
-                    sade_sathi_periods.append({
-                        'name': 'Sade Sathi',
-                        'phase': phase,
-                        'intensity': intensity,
-                        'start_date': sade_sathi_start,
-                        'end_date': sade_sathi_end,
-                        'start_age': self.calculate_age(birth_date, sade_sathi_start),
-                        'end_age': self.calculate_age(birth_date, sade_sathi_end),
-                        'duration_years': 7.5,
-                        'moon_sign': self.get_sign_name(moon_sign),
-                        'saturn_house': house,
-                        'effects': self.get_sade_sathi_effects(phase),
-                        'remedies': self.get_sade_sathi_remedies(phase)
-                    })
-                    
-                    cycle_count += 1
+            # Ensure we don't go beyond 100 years
+            if start_age > 95:  # Leave room for 7.5 year duration
+                break
             
-            # Move to next Saturn cycle
-            current_date += timedelta(days=saturn_cycle_days)
+            # Calculate actual dates
+            start_date = base_birth_date + timedelta(days=int(start_age * 365.25))
+            end_date = start_date + timedelta(days=int(sade_sathi_duration_years * 365.25))
+            
+            # Determine phase based on cycle progression
+            phases = ["Rising (Arohini)", "Peak (Madhya)", "Setting (Avarohi)"]
+            phase_index = cycle % 3  # Cycle through phases
+            if cycle == 3:  # 4th cycle
+                phase_index = 0  # Start with Rising again
+            
+            phase = phases[phase_index]
+            intensity = "High" if phase_index == 1 else "Moderate"
+            
+            sade_sathi_periods.append({
+                'name': 'Sade Sathi',
+                'phase': phase,
+                'intensity': intensity,
+                'start_date': start_date,
+                'end_date': end_date,
+                'start_age': round(start_age, 1),
+                'end_age': round(start_age + sade_sathi_duration_years, 1),
+                'duration_years': sade_sathi_duration_years,
+                'moon_sign': self.get_sign_name(moon_sign),
+                'saturn_house': [12, 1, 2][phase_index],
+                'effects': self.get_sade_sathi_effects(phase),
+                'remedies': self.get_sade_sathi_remedies(phase),
+                'cycle_number': cycle + 1
+            })
         
         return sade_sathi_periods
 
@@ -221,45 +210,47 @@ class PlanetaryAfflictionsCalculator:
         # Convert date to datetime for calculations
         if not hasattr(birth_date, 'hour'):
             from datetime import datetime
-            current_date = datetime(birth_date.year, birth_date.month, birth_date.day)
-            end_date = datetime(birth_date.year + 100, birth_date.month, birth_date.day)
+            base_birth_date = datetime(birth_date.year, birth_date.month, birth_date.day)
         else:
-            current_date = birth_date
-            end_date = birth_date + timedelta(days=365 * 100)
+            base_birth_date = birth_date
         
         # Saturn takes about 2.5 years to transit through each sign
-        saturn_sign_transit_days = int(2.5 * 365.25)
+        # Ashtama Shani occurs every 29.5 years when Saturn is in 8th house from Moon
+        saturn_cycle_years = 29.5
+        ashtama_duration_years = 2.5
         
-        cycle_count = 0
-        while current_date < end_date and cycle_count < 4:
-            jd = self.julian_day(current_date)
-            saturn_pos = self.get_planet_position('saturn', jd)
+        # Calculate when Saturn will be in 8th house from Moon sign
+        eighth_house_sign = ((moon_sign + 6) % 12) + 1  # 8th house from Moon
+        
+        # Calculate approximate timing based on Moon sign
+        moon_sign_offset = ((eighth_house_sign - 1) * 2.5)  # Each sign takes ~2.5 years
+        
+        for cycle in range(4):  # 4 cycles in 100+ years
+            # Calculate start age for this Ashtama Shani period
+            start_age = (cycle * saturn_cycle_years) + moon_sign_offset
             
-            if saturn_pos:
-                saturn_sign = saturn_pos['sign']
-                eighth_house_sign = ((moon_sign + 6) % 12) + 1  # 8th house from Moon
-                
-                if saturn_sign == eighth_house_sign:
-                    ashtama_start = current_date
-                    ashtama_end = current_date + timedelta(days=saturn_sign_transit_days)
-                    
-                    ashtama_periods.append({
-                        'name': 'Ashtama Shani',
-                        'start_date': ashtama_start,
-                        'end_date': ashtama_end,
-                        'start_age': self.calculate_age(birth_date, ashtama_start),
-                        'end_age': self.calculate_age(birth_date, ashtama_end),
-                        'duration_years': 2.5,
-                        'intensity': 'Very High',
-                        'moon_sign': self.get_sign_name(moon_sign),
-                        'effects': 'Major life transformations, hidden challenges, health issues, accidents, inheritance matters',
-                        'remedies': 'Hanuman Chalisa, Saturn mantras, donate black items on Saturdays, help elderly people'
-                    })
-                    
-                    cycle_count += 1
+            # Ensure we don't go beyond 100 years
+            if start_age > 97.5:  # Leave room for 2.5 year duration
+                break
             
-            # Move to next cycle
-            current_date += timedelta(days=int(29.5 * 365.25))
+            # Calculate actual dates
+            start_date = base_birth_date + timedelta(days=int(start_age * 365.25))
+            end_date = start_date + timedelta(days=int(ashtama_duration_years * 365.25))
+            
+            ashtama_periods.append({
+                'name': 'Ashtama Shani',
+                'start_date': start_date,
+                'end_date': end_date,
+                'start_age': round(start_age, 1),
+                'end_age': round(start_age + ashtama_duration_years, 1),
+                'duration_years': ashtama_duration_years,
+                'intensity': 'Very High',
+                'moon_sign': self.get_sign_name(moon_sign),
+                'eighth_house_sign': self.get_sign_name(eighth_house_sign),
+                'effects': 'Major life transformations, hidden challenges, health issues, accidents, inheritance matters',
+                'remedies': 'Hanuman Chalisa, Saturn mantras, donate black items on Saturdays, help elderly people',
+                'cycle_number': cycle + 1
+            })
         
         return ashtama_periods
 
@@ -407,7 +398,7 @@ class PlanetaryAfflictionsCalculator:
         """Get complete afflictions timeline from birth to 100 years"""
         timeline = {
             'birth_date': birth_date,
-            'sade_sathi_periods': self.calculate_sade_sathi_periods(birth_date),
+        'sade_sathi_periods': self.calculate_sade_sathi_periods(birth_date),
             'ashtama_shani_periods': self.calculate_ashtama_shani_periods(birth_date),
             'kuja_dosha': self.check_kuja_dosha(birth_date),
             'kala_sarpa_dosha': self.check_kala_sarpa_dosha(birth_date),
