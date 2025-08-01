@@ -85,14 +85,14 @@ def render_fun_chat(birth_data):
         for i, msg in enumerate(reversed(valid_messages), 1):
             with st.expander(f"Q{len(valid_messages) - i + 1}: {msg['question'][:50]}...", expanded=False):
                 st.write(f"**🙋 You:** {msg['question']}")
-                st.write(f"**🎉 Cosmic Buddy:** {msg['answer']}")
+                st.write(f"**🎉 Maha Prabhu:** {msg['answer']}")
                 if msg.get('timestamp'):
                     st.caption(f"*Asked: {msg['timestamp']}*")
         
         st.markdown("---")
     else:
         # Welcome message for new users
-        st.info("🌟 Welcome to Fun Astro Chat! I'm your cosmic buddy ready to make astrology fun and engaging! Ask me anything about the stars, planets, or just chat! ✨")
+        st.info("🌟 Welcome to Fun Astro Chat! I'm Maha Prabhu, your mystical guide ready to make astrology fun and engaging! Ask me anything about the stars, planets, or just chat! ✨")
     
     # Fun suggestion list (non-clickable) - moved above question input
     # st.markdown("---")
@@ -135,7 +135,7 @@ def render_fun_chat(birth_data):
     # Submit and clear buttons
     col_submit, col_clear = st.columns([3, 1])
     with col_submit:
-        if st.button("🌟 Chat with Cosmic Buddy!", type="primary", disabled=not user_question.strip()):
+        if st.button("🌟 Chat with Maha Prabhu!", type="primary", disabled=not user_question.strip()):
             if user_question.strip():
                 with st.spinner("🌟 Consulting the cosmic wisdom..."):
                     # Get fun AI response
@@ -149,7 +149,7 @@ def render_fun_chat(birth_data):
                         st.success("✨ Cosmic wisdom received!")
                         with st.container():
                             st.write(f"**🙋 Your Question:** {user_question}")
-                            st.write(f"**🎉 Cosmic Buddy's Answer:**")
+                            st.write(f"**🎉 Maha Prabhu's Answer:**")
                             st.markdown(response)
                         
                         # Clear the input by incrementing counter

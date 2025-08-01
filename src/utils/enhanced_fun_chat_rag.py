@@ -420,12 +420,7 @@ Tool names: {tool_names}
         # Step 1: Check RAG knowledge base
         if rag_result["found"]:
             # Found in RAG - use cosmic database wisdom
-            similarity_percent = int(rag_result["similarity"] * 100)
-            return f"""Hey Dude, this wisdom comes straight from my cosmic database with {similarity_percent}% certainty! 🌟
-
-{rag_result['answer']} ✨
-
-🚀 This mystical knowledge flows directly from Maha Prabhu's embedded consciousness! Ask me more cosmic questions! 🔮"""
+            return f"Hey Dude, {rag_result['answer']} ✨"
         
         # Step 2: No RAG match - use external tools if available
         elif external_info and external_info not in ["No information found", "Search failed", "No specific information found"]:
@@ -484,12 +479,7 @@ My cosmic database shows {best_similarity}% similarity to existing wisdom, but n
         
         if rag_result["found"]:
             # Found in RAG - return immediately
-            similarity_percent = int(rag_result["similarity"] * 100)
-            return f"""Hey Dude, this wisdom comes straight from my cosmic database with {similarity_percent}% certainty! 🌟
-
-{rag_result['answer']} ✨
-
-🚀 This mystical knowledge flows directly from Maha Prabhu's embedded consciousness! Ask me more cosmic questions! 🔮"""
+            return f"Hey Dude, {rag_result['answer']} ✨"
         
         # Step 2: RAG failed - try Wikipedia
         try:
