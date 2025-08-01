@@ -52,6 +52,8 @@ def render_sidebar_navigation():
         st.switch_page("pages/07_Reports.py")
     if st.sidebar.button("🔮 Generate Vedic Horoscope", use_container_width=True, key="nav_vedic_horoscope"):
         st.switch_page("pages/08_Generate_Vedic_Horoscope.py")
+    if st.sidebar.button("🎉 Fun Astro Chat", use_container_width=True, key="nav_fun_chat"):
+        st.switch_page("pages/09_Fun_Chat.py")
 
 def render_header():
     """Render main header section"""
