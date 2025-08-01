@@ -215,10 +215,10 @@ def generate_fun_chat_rag_response(question, birth_data=None, session_id="fun_ch
     """Generate RAG-enhanced response specifically for Fun Chat"""
     try:
         # Import here to avoid circular imports and handle missing dependencies gracefully
-        from src.utils.fun_chat_rag import get_fun_chat_rag
+        from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
         
         with st.spinner(spinner_text):
-            rag_system = get_fun_chat_rag()
+            rag_system = get_simple_fun_chat_rag()
             if rag_system.is_available():
                 return rag_system.get_response(question, birth_data, session_id)
             else:

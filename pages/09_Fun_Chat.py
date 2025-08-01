@@ -173,11 +173,11 @@ def render_fun_chat_sidebar_info():
         
         # Check RAG system status
         try:
-            from src.utils.fun_chat_rag import get_fun_chat_rag
-            rag_system = get_fun_chat_rag()
+            from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
+            rag_system = get_simple_fun_chat_rag()
             if rag_system.is_available():
                 st.success("🧠 RAG Knowledge Base: Active")
-                st.caption("Using Maha Prabhu's wisdom from knowledge base")
+                st.caption(f"Using Maha Prabhu's wisdom ({len(rag_system.knowledge_base)} Q&A pairs)")
             else:
                 st.warning("⚡ Basic AI Mode: Active")
                 st.caption("RAG system unavailable, using standard responses")
@@ -224,10 +224,10 @@ def main():
     
     # Add RAG status info
     try:
-        from src.utils.fun_chat_rag import get_fun_chat_rag
-        rag_system = get_fun_chat_rag()
+        from src.utils.simple_fun_chat_rag import get_simple_fun_chat_rag
+        rag_system = get_simple_fun_chat_rag()
         if rag_system.is_available():
-            st.info("🧠 **Enhanced with Knowledge Base:** I'm powered by Maha Prabhu's wisdom and can remember our conversation!")
+            st.info(f"🧠 **Enhanced with Knowledge Base:** I have {len(rag_system.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom!")
         else:
             st.info("🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!")
     except Exception:
