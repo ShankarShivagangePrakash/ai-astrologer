@@ -4,6 +4,8 @@ langchain
 langchain_openai
 langchain-core
 langchain-community
+langchain-chroma
+chromadb
 requests
 
 pyswisseph==2.10.3.2

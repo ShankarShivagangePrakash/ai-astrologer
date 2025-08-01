@@ -211,6 +211,58 @@ def generate_ai_response(prompt, spinner_text="🔮 Generating response..."):
     except Exception as e:
         return f"Unable to generate response at this time. Error: {str(e)}"
 
+def generate_fun_chat_rag_response(question, birth_data=None, session_id="fun_chat_default", spinner_text="🌟 Consulting the cosmic wisdom..."):
+    """Generate RAG-enhanced response specifically for Fun Chat"""
+    try:
+        # Import here to avoid circular imports and handle missing dependencies gracefully
+        from src.utils.fun_chat_rag import get_fun_chat_rag
+        
+        with st.spinner(spinner_text):
+            rag_system = get_fun_chat_rag()
+            if rag_system.is_available():
+                return rag_system.get_response(question, birth_data, session_id)
+            else:
+                # Fallback to regular AI response with fun persona
+                fallback_prompt = f"""
+                You are a fun, engaging, and wise Vedic astrology chatbot with a playful personality. 
+                Answer the user's question in an entertaining yet informative way.
+                
+                User Question: {question}
+                
+                Guidelines for your response:
+                1. Be fun, conversational, and engaging 
+                2. Use emojis and creative language
+                3. Include relevant astrological insights when applicable
+                4. Keep it light-hearted but educational
+                5. Use analogies, metaphors, and storytelling when appropriate
+                6. Add a touch of humor while respecting the wisdom of astrology
+                
+                Make your response engaging, informative, and fun to read!
+                """
+                return generate_ai_response(fallback_prompt, spinner_text)
+                
+    except ImportError:
+        # If RAG dependencies aren't available, use regular AI response
+        fallback_prompt = f"""
+        You are a fun, engaging, and wise Vedic astrology chatbot with a playful personality. 
+        Answer the user's question in an entertaining yet informative way.
+        
+        User Question: {question}
+        
+        Guidelines for your response:
+        1. Be fun, conversational, and engaging 
+        2. Use emojis and creative language
+        3. Include relevant astrological insights when applicable
+        4. Keep it light-hearted but educational
+        5. Use analogies, metaphors, and storytelling when appropriate
+        6. Add a touch of humor while respecting the wisdom of astrology
+        
+        Make your response engaging, informative, and fun to read!
+        """
+        return generate_ai_response(fallback_prompt, spinner_text)
+    except Exception as e:
+        return f"🌙 Oops! The cosmic signals seem a bit fuzzy right now. Try asking again! ✨ (Error: {str(e)})"
+
 # =============================================================================
 # UI UTILITIES
 # =============================================================================

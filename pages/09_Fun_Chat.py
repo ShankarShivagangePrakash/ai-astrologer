@@ -2,53 +2,13 @@ import streamlit as st
 from src.utils.page_utils import (
     render_standard_disclaimer
 )
-from src.utils.common import generate_ai_response, get_session_value, SESSION_KEYS
+from src.utils.common import generate_fun_chat_rag_response, get_session_value, SESSION_KEYS
 from src.utils.ui_components import render_sidebar_navigation
 
 def generate_fun_astro_response(user_question, birth_data=None):
-    """Generate fun and engaging astrology-themed responses"""
-    if birth_data and birth_data.get('date'):
-        # Extract comprehensive location information
-        location_info = birth_data.get('location', {})
-        if isinstance(location_info, dict):
-            city = location_info.get('city', '')
-            state = location_info.get('state', '')
-            country = location_info.get('country', '')
-            location_str = f"{city}, {state}, {country}" if state else f"{city}, {country}"
-        else:
-            location_str = birth_data.get('place', 'Not specified')
-        
-        birth_context = f"""
-        User's Birth Information:
-        - Date: {birth_data['date']}
-        - Time: {birth_data.get('time', 'Not specified')}
-        - Place: {location_str}
-        """
-    else:
-        birth_context = "No birth data available - provide general responses."
-    
-    prompt = f"""
-    You are a fun, engaging, and wise Vedic astrology chatbot with a playful personality. 
-    Answer the user's question in an entertaining yet informative way.
-    
-    {birth_context}
-    
-    User Question: {user_question}
-    
-    Guidelines for your response:
-    1. Be fun, conversational, and engaging 
-    2. Use emojis and creative language
-    3. Include relevant astrological insights when applicable
-    4. If birth data is available, make it personal
-    5. Keep it light-hearted but educational
-    6. Use analogies, metaphors, and storytelling when appropriate
-    7. Add a touch of humor while respecting the wisdom of astrology
-    8. If the question isn't astrology-related, gently guide back to astrology with fun facts
-    
-    Make your response engaging, informative, and fun to read!
-    """
-    
-    return generate_ai_response(prompt)
+    """Generate fun and engaging astrology-themed responses with RAG enhancement"""
+    # Use the new RAG-enhanced response function
+    return generate_fun_chat_rag_response(user_question, birth_data)
 
 def get_fun_chat_history():
     """Get fun chat history from session state"""
@@ -149,7 +109,12 @@ def render_fun_chat(birth_data):
     - 💎 What gemstone suits my energy?
     - 🕉️ What rituals would help me?
     - 🎭 How do I vibe with other signs?
+    - 🧙‍♂️ What is your name? (Try this for special wisdom!)
+    - 💪 How can I grow in life?
+    - 🧘‍♀️ How do I take out stress from my life?
+    - 🏥 How can I improve my health?
     """)
+    
     
     st.markdown("---")
     # Question input
@@ -205,6 +170,21 @@ def render_fun_chat_sidebar_info():
     with st.sidebar:
         st.markdown("---")
         st.write("### 🎉 Fun Astro Chat")
+        
+        # Check RAG system status
+        try:
+            from src.utils.fun_chat_rag import get_fun_chat_rag
+            rag_system = get_fun_chat_rag()
+            if rag_system.is_available():
+                st.success("🧠 RAG Knowledge Base: Active")
+                st.caption("Using Maha Prabhu's wisdom from knowledge base")
+            else:
+                st.warning("⚡ Basic AI Mode: Active")
+                st.caption("RAG system unavailable, using standard responses")
+        except Exception:
+            st.info("🌟 Standard AI Mode: Active")
+            st.caption("Using enhanced AI responses")
+        
         chat_messages = get_fun_chat_history()
         
         # Filter out messages that don't have the expected structure
@@ -240,7 +220,18 @@ def main():
     
     # Page header without birth data display
     st.title("🎉 Fun Astro Chat")
-    st.markdown("### Chat with AI about Astrology in a Fun Way!")
+    st.markdown("### Chat with Maha Prabhu's AI Wisdom in a Fun Way!")
+    
+    # Add RAG status info
+    try:
+        from src.utils.fun_chat_rag import get_fun_chat_rag
+        rag_system = get_fun_chat_rag()
+        if rag_system.is_available():
+            st.info("🧠 **Enhanced with Knowledge Base:** I'm powered by Maha Prabhu's wisdom and can remember our conversation!")
+        else:
+            st.info("🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!")
+    except Exception:
+        st.info("🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!")
     
     # Get birth data silently (for AI use, but don't display it)
     birth_data = get_session_value(SESSION_KEYS['BIRTH_DATA'], {})
