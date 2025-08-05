@@ -30,11 +30,21 @@ def add_to_fun_chat_history(question, answer):
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    st.session_state.fun_chat_messages.append({
+    # Get method info if available
+    method_info = st.session_state.get('last_rag_method', {})
+    
+    message_data = {
         'question': question,
         'answer': answer,
         'timestamp': timestamp
-    })
+    }
+    
+    # Add method information if available
+    if method_info:
+        message_data['method'] = method_info.get('method', 'unknown')
+        message_data['similarity'] = method_info.get('similarity', 0.0)
+    
+    st.session_state.fun_chat_messages.append(message_data)
 
 def clear_fun_chat_history():
     """Clear fun chat history"""
@@ -83,9 +93,36 @@ def render_fun_chat(birth_data):
         
         # Display messages in reverse order (latest first)
         for i, msg in enumerate(reversed(valid_messages), 1):
-            with st.expander(f"Q{len(valid_messages) - i + 1}: {msg['question'][:50]}...", expanded=False):
+            # Get method info for display
+            method = msg.get('method', 'Unknown')
+            similarity = msg.get('similarity', 0.0)
+            
+            # Choose color based on method
+            if method == "ChromaDB Vector Search":
+                method_icon = "🟢"
+            elif method == "DuckDuckGo Search":
+                method_icon = "🟡"
+            elif method == "Wikipedia Search":
+                method_icon = "🟠"
+            elif method == "AI Assistant":
+                method_icon = "🔵"
+            else:
+                method_icon = "⚪"
+            
+            # Create expander title with method info
+            if method != 'Unknown':
+                expander_title = f"Q{len(valid_messages) - i + 1}: {msg['question'][:40]}... {method_icon}"
+            else:
+                expander_title = f"Q{len(valid_messages) - i + 1}: {msg['question'][:50]}..."
+            
+            with st.expander(expander_title, expanded=False):
                 st.write(f"**🙋 You:** {msg['question']}")
                 st.write(f"**🎉 Maha Prabhu:** {msg['answer']}")
+                
+                # Show method and similarity if available
+                if method != 'Unknown':
+                    st.caption(f"**Source:** {method_icon} {method} (Similarity: {similarity:.1%})")
+                
                 if msg.get('timestamp'):
                     st.caption(f"*Asked: {msg['timestamp']}*")
         
@@ -147,6 +184,27 @@ def render_fun_chat(birth_data):
                         
                         # Show the response
                         st.success("✨ Cosmic wisdom received!")
+                        
+                        # Display method used (if available)
+                        if 'last_rag_method' in st.session_state and st.session_state.last_rag_method:
+                            method_info = st.session_state.last_rag_method
+                            method = method_info.get('method', 'unknown')
+                            similarity = method_info.get('similarity', 0.0)
+                            
+                            # Color code based on method
+                            if method == "ChromaDB Vector Search":
+                                method_color = "🟢"
+                            elif method == "DuckDuckGo Search":
+                                method_color = "🟡"
+                            elif method == "Wikipedia Search":
+                                method_color = "🟠"
+                            elif method == "AI Assistant":
+                                method_color = "🔵"
+                            else:
+                                method_color = "⚪"
+                            
+                            st.info(f"{method_color} **Answer Source:** {method} (Similarity: {similarity:.1%})")
+                        
                         with st.container():
                             st.write(f"**🙋 Your Question:** {user_question}")
                             st.write(f"**🎉 Maha Prabhu's Answer:**")
@@ -171,24 +229,54 @@ def render_fun_chat_sidebar_info():
         st.markdown("---")
         st.write("### 🎉 Fun Astro Chat")
         
-        # Check Enhanced RAG system status
+        # Check Multi-Method RAG system status
         system_status = "🌟 Standard AI Mode"
         system_details = "Using enhanced AI responses"
         
         try:
-            from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
-            enhanced_rag = get_enhanced_fun_chat_rag()
-            if enhanced_rag.is_available():
-                system_status = "🤖 Enhanced Agent Mode"
-                system_details = f"RAG + Wikipedia + Web Search ({len(enhanced_rag.knowledge_base)} Q&A pairs)"
+            from src.utils.multi_method_rag import get_multi_method_rag
+            multi_rag = get_multi_method_rag()
+            if multi_rag.is_available():
+                system_status = "🚀 Multi-Method RAG System"
+                kb_size = multi_rag.get_knowledge_base_size()
+                system_details = f"ChromaDB Vector Search ({kb_size} documents)"
                 st.success(f"{system_status}: Active")
                 st.caption(system_details)
+                
+                # Show search methods
+                st.write("**Search Methods:**")
+                st.caption("🟢 1. ChromaDB Vector Search")
+                st.caption("🟡 2. DuckDuckGo Search") 
+                st.caption("🟠 3. Wikipedia Search")
+                st.caption("🔵 4. AI Assistant")
+                st.caption(f"**Threshold:** {multi_rag.similarity_threshold:.0%} similarity")
+                
             else:
                 st.warning("⚡ Basic AI Mode: Active")
-                st.caption("Enhanced RAG unavailable, using standard responses")
+                st.caption("Multi-method RAG unavailable, using standard responses")
         except ImportError:
             st.info(f"{system_status}: Active")
             st.caption(system_details)
+        
+        # Show last method used
+        if 'last_rag_method' in st.session_state and st.session_state.last_rag_method:
+            method_info = st.session_state.last_rag_method
+            method = method_info.get('method', 'unknown')
+            similarity = method_info.get('similarity', 0.0)
+            
+            st.write("**Last Answer Source:**")
+            if method == "ChromaDB Vector Search":
+                st.success(f"🟢 {method}")
+            elif method == "DuckDuckGo Search":
+                st.warning(f"🟡 {method}")
+            elif method == "Wikipedia Search":
+                st.info(f"🟠 {method}")
+            elif method == "AI Assistant":
+                st.info(f"🔵 {method}")
+            else:
+                st.info(f"⚪ {method}")
+            
+            st.caption(f"Similarity: {similarity:.1%}")
         
         chat_messages = get_fun_chat_history()
         
@@ -231,30 +319,30 @@ def main():
     system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
     
     try:
-        # Check for Enhanced RAG
-        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
-        enhanced_rag = get_enhanced_fun_chat_rag()
-        if enhanced_rag.is_available():
-            system_info = f"🤖 **Enhanced Agent Mode:** I have {len(enhanced_rag.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom + Wikipedia + Web Search!"
+        # Check for Multi-Method RAG
+        from src.utils.multi_method_rag import get_multi_method_rag
+        multi_rag = get_multi_method_rag()
+        if multi_rag.is_available():
+            kb_size = multi_rag.get_knowledge_base_size()
+            system_info = f"🚀 **Multi-Method ChromaDB RAG:** I use 4 search methods with {multi_rag.similarity_threshold:.0%} similarity threshold!"
+            st.info(system_info)
+            
+            # Show method details
+            st.markdown(f"""
+            **🔍 Search Methods (in order):**
+            - 🟢 **ChromaDB Vector Search:** {kb_size} documents in vector database
+            - 🟡 **DuckDuckGo Search:** Live web search for astrology content  
+            - 🟠 **Wikipedia Search:** Reliable encyclopedia knowledge
+            - 🔵 **AI Assistant:** Personalized Maha Prabhu responses
+            
+            *I'll use the first method that gives ≥40% similarity, or fall back to AI Assistant!*
+            """)
         else:
             system_info = "🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!"
+            st.info(system_info)
     except ImportError:
         system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
-    
-    st.info(system_info)
-    
-    try:
-        # Check for Enhanced RAG
-        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
-        enhanced_rag = get_enhanced_fun_chat_rag()
-        if enhanced_rag.is_available():
-            system_info = f"🤖 **Enhanced Agent Mode:** I have {len(enhanced_rag.knowledge_base)} Q&A pairs from Maha Prabhu's wisdom + Wikipedia + Web Search!"
-        else:
-            system_info = "🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!"
-    except ImportError:
-        system_info = "🌟 **Fun AI Chat:** Ask me anything about astrology - I'll make it entertaining!"
-    
-    st.info(system_info)
+        st.info(system_info)
     
     # Get birth data silently (for AI use, but don't display it)
     birth_data = get_session_value(SESSION_KEYS['BIRTH_DATA'], {})

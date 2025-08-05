@@ -212,39 +212,50 @@ def generate_ai_response(prompt, spinner_text="🔮 Generating response..."):
         return f"Unable to generate response at this time. Error: {str(e)}"
 
 def generate_fun_chat_rag_response(question, birth_data=None, session_id="fun_chat_default", spinner_text="🌟 Consulting the cosmic wisdom..."):
-    """Generate enhanced RAG response with agent and external tools for Fun Chat"""
+    """Generate response using multi-method RAG with cosine similarity thresholds"""
     try:
-        # Try enhanced RAG (with agent and external tools)
-        from src.utils.enhanced_fun_chat_rag import get_enhanced_fun_chat_rag
+        # Try new multi-method RAG system
+        from src.utils.multi_method_rag import get_multi_method_rag
         
-        with st.spinner(spinner_text):
-            enhanced_rag = get_enhanced_fun_chat_rag()
-            if enhanced_rag.is_available():
-                return enhanced_rag.get_response(question, birth_data, session_id)
-            else:
-                # Fallback to regular AI response with Maha Prabhu persona
-                fallback_prompt = f"""
-                You are Maha Prabhu, a fun, engaging, and wise Vedic astrology guru with a playful personality. 
-                Answer the user's question in an entertaining yet informative way.
-                
-                User Question: {question}
-                
-                Guidelines for your response:
-                1. Start with "Hey Dude," as your signature greeting
-                2. Be fun, conversational, and engaging 
-                3. Use emojis and creative language (🌟✨🔮🚀🌙💫)
-                4. Include relevant astrological insights when applicable
-                5. Keep it light-hearted but educational
-                6. Use analogies, metaphors, and storytelling when appropriate
-                7. Add a touch of humor while respecting the wisdom of astrology
-                8. End with mystical encouragement to ask more questions
-                
-                Make your response engaging, informative, and fun to read as Maha Prabhu!
-                """
-                return generate_ai_response(fallback_prompt, spinner_text)
+        multi_rag = get_multi_method_rag()
+        if multi_rag.is_available():
+            result = multi_rag.get_response(question, birth_data, session_id)
+            
+            # Store method info in session state for UI display
+            if 'last_rag_method' not in st.session_state:
+                st.session_state.last_rag_method = {}
+            
+            st.session_state.last_rag_method = {
+                'method': result.get('method', 'unknown'),
+                'similarity': result.get('similarity', 0.0),
+                'timestamp': result.get('timestamp', '')
+            }
+            
+            return result.get('response', 'No response generated')
+        else:
+            # Fallback to regular AI response with Maha Prabhu persona
+            fallback_prompt = f"""
+            You are Maha Prabhu, a fun, engaging, and wise Vedic astrology guru with a playful personality. 
+            Answer the user's question in an entertaining yet informative way.
+            
+            User Question: {question}
+            
+            Guidelines for your response:
+            1. Start with "Hey Dude," as your signature greeting
+            2. Be fun, conversational, and engaging 
+            3. Use emojis and creative language (🌟✨🔮🚀🌙💫)
+            4. Include relevant astrological insights when applicable
+            5. Keep it light-hearted but educational
+            6. Use analogies, metaphors, and storytelling when appropriate
+            7. Add a touch of humor while respecting the wisdom of astrology
+            8. End with mystical encouragement to ask more questions
+            
+            Make your response engaging, informative, and fun to read as Maha Prabhu!
+            """
+            return generate_ai_response(fallback_prompt, spinner_text)
                 
     except ImportError:
-        # If enhanced RAG dependencies aren't available, use regular AI response
+        # If multi-method RAG dependencies aren't available, use regular AI response
         fallback_prompt = f"""
         You are Maha Prabhu, a fun, engaging, and wise Vedic astrology guru with a playful personality. 
         Answer the user's question in an entertaining yet informative way.

@@ -1,7 +1,6 @@
 streamlit
 streamlit-elements
 langchain
-langchain_openai
 langchain-core
 langchain-community
 langchain-chroma
@@ -9,6 +8,8 @@ chromadb
 requests
 wikipedia
 duckduckgo-search
+numpy
+sentence-transformers
 
 pyswisseph==2.10.3.2
 skyfield==1.48
