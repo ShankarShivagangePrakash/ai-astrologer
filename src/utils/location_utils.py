@@ -141,7 +141,7 @@ def render_location_inputs(default_city="", default_state="", default_country=""
     Render location input fields (city, state, country)
     Returns: tuple of (city, state, country)
     """
-    st.write("**Birth Location:**")
+    # st.write("**Birth Location:**")
     
     # Create three columns for location inputs
     loc_col1, loc_col2, loc_col3 = st.columns([2, 2, 2])

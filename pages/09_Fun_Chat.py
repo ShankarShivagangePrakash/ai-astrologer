@@ -129,7 +129,7 @@ def render_fun_chat(birth_data):
         st.markdown("---")
     else:
         # Welcome message for new users
-        st.info("🌟 Welcome to Fun Astro Chat! I'm Maha Prabhu, your mystical guide ready to make astrology fun and engaging! Ask me anything about the stars, planets, or just chat! ✨")
+        st.info("🌟 Welcome to Fun Astro Chat! I'm Maha Prabhu, your mystical guide ready to make astrology fun and engaging! Ask me anything or just chat! ✨")
     
     # Fun suggestion list (non-clickable) - moved above question input
     # st.markdown("---")
@@ -323,7 +323,6 @@ def main():
             - 🟠 **Wikipedia Search:** Reliable encyclopedia knowledge
             - 🔵 **AI Assistant:** Personalized Maha Prabhu responses
             
-            *I'll use the first method that gives ≥40% similarity, or fall back to AI Assistant!*
             """)
         else:
             system_info = "🌟 **Standard AI Mode:** Ready to chat about astrology with fun personality!"

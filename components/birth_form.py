@@ -43,27 +43,46 @@ def render_birth_form():
                 help="Select your birth date (supports dates up to 100 years ago)"
             )
             
-            # Time input
-            st.write("**Select birth time:**")
-            time_col1, time_col2 = st.columns(2)
-            with time_col1:
-                birth_hour = st.selectbox(
-                    "Hour", 
-                    options=list(range(0, 24)),
-                    index=0,
-                    format_func=lambda x: f"{x:02d}"
-                )
-            with time_col2:
-                birth_minute = st.selectbox(
-                    "Minute", 
-                    options=list(range(0, 60)),
-                    index=0,
-                    format_func=lambda x: f"{x:02d}"
-                )
         
         with col2:
-            # Location inputs (simplified - coordinates fetched automatically)
-            city, state, country = render_location_inputs()
+            # City input only 
+            city = st.text_input(
+                "City*", 
+                value="",
+                placeholder="e.g., Mumbai, New York",
+                help="Enter the city where you were born"
+            )
+            
+        # Time and Location fields at same horizontal level
+        time_loc_col1, time_loc_col2, time_loc_col3, time_loc_col4 = st.columns(4)
+        with time_loc_col1:
+            birth_hour = st.selectbox(
+                "Hour", 
+                options=list(range(0, 24)),
+                index=0,
+                format_func=lambda x: f"{x:02d}"
+            )
+        with time_loc_col2:
+            birth_minute = st.selectbox(
+                "Minute", 
+                options=list(range(0, 60)),
+                index=0,
+                format_func=lambda x: f"{x:02d}"
+            )
+        with time_loc_col3:
+            state = st.text_input(
+                "State/Province", 
+                value="",
+                placeholder="e.g., Maharashtra",
+                help="Enter state or province (optional but recommended)"
+            )
+        with time_loc_col4:
+            country = st.text_input(
+                "Country*", 
+                value="",
+                placeholder="e.g., India, USA",
+                help="Enter the country where you were born"
+            )
             
         # Create helper function for processing birth data
         def process_birth_data():
