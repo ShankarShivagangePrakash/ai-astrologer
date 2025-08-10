@@ -5,7 +5,7 @@ Implements sequential search with cosine similarity thresholds:
 2. Wikipedia Search
 3. GPT-4 Response
 
-Each method is only called if previous method's cosine similarity < 40%
+Each method is only called if previous method's cosine similarity < 35%
 """
 
 import os
@@ -47,7 +47,7 @@ class MultiMethodRAG:
         self.retriever = None
         self.embeddings_model = None
         self.is_ready = False
-        self.similarity_threshold = 0.4  # 40% threshold
+        self.similarity_threshold = 0.35  # 35% threshold - lowered for better Wikipedia matching
         self.collection_name = "astrology_knowledge"
         
         # Initialize tools
@@ -120,7 +120,7 @@ class MultiMethodRAG:
             
             # Initialize OpenAI LLM using existing setup_ai_model function
             try:
-                self.openai_llm = setup_ai_model(model_name="gpt-4", temperature=0.7)
+                self.openai_llm = setup_ai_model(model_name="gpt-4o", temperature=0.7)
                 if self.openai_llm:
                     st.success("✅ OpenAI GPT-4 initialized successfully")
                 else:
@@ -242,6 +242,76 @@ class MultiMethodRAG:
         except:
             return 0.0
     
+    def _calculate_wikipedia_similarity(self, question: str, content: str) -> float:
+        """Calculate similarity for Wikipedia content with better logic for factual questions"""
+        try:
+            # Extract key content words from question (remove stop words)
+            stop_words = {'who', 'what', 'when', 'where', 'why', 'how', 'is', 'are', 'was', 'were', 'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+            
+            question_words = set(re.findall(r'\w+', question.lower()))
+            content_words = set(re.findall(r'\w+', content.lower()))
+            
+            # Remove stop words from question
+            key_question_words = question_words - stop_words
+            
+            if not key_question_words:
+                return 0.0
+            
+            # Check how many key question words appear in content
+            matches = key_question_words.intersection(content_words)
+            
+            # Calculate similarity based on key word coverage
+            similarity = len(matches) / len(key_question_words)
+            
+            # Only give content bonus if there are actual word matches
+            # This prevents irrelevant long content from getting high scores
+            if similarity > 0 and len(content) > 100:  # Only bonus if words match AND substantial content
+                similarity = min(similarity + 0.3, 1.0)  # Add 30% bonus
+            
+            return similarity
+        except:
+            return 0.0
+    
+    def _calculate_rag_similarity(self, question: str, content: str) -> float:
+        """Calculate similarity for RAG content - more conservative than Wikipedia"""
+        try:
+            # Extract key content words from question (remove stop words)
+            stop_words = {'who', 'what', 'when', 'where', 'why', 'how', 'is', 'are', 'was', 'were', 'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+            
+            question_words = set(re.findall(r'\w+', question.lower()))
+            content_words = set(re.findall(r'\w+', content.lower()))
+            
+            # Remove stop words from question
+            key_question_words = question_words - stop_words
+            
+            if not key_question_words:
+                return 0.0
+            
+            # Special handling for identity questions
+            identity_indicators = {'name', 'maha', 'prabhu', 'guru', 'astrologist', 'experienced', 'satyananda'}
+            identity_questions = {'you', 'your', 'yourself'}
+            
+            # If asking about identity and content has identity markers
+            if key_question_words.intersection(identity_questions) and content_words.intersection(identity_indicators):
+                # Give high similarity for identity matches
+                identity_match_score = len(content_words.intersection(identity_indicators)) / len(identity_indicators)
+                if identity_match_score > 0:
+                    return min(identity_match_score + 0.4, 1.0)  # Boost identity matches
+            
+            # Standard word matching for other questions
+            matches = key_question_words.intersection(content_words)
+            
+            # Calculate similarity based on key word coverage
+            similarity = len(matches) / len(key_question_words)
+            
+            # For RAG, only give a small bonus and only if there are matches
+            if similarity > 0:  # Only if there are actual word matches
+                similarity = min(similarity + 0.1, 1.0)  # Small 10% bonus for RAG matches
+            
+            return similarity
+        except:
+            return 0.0
+    
     def method_1_rag_search(self, question: str) -> Tuple[Optional[str], float]:
         """Method 1: Search in ChromaDB vector database using retriever"""
         try:
@@ -257,12 +327,9 @@ class MultiMethodRAG:
             # Get the most relevant document
             best_doc = relevant_docs[0]
             
-            # Calculate similarity using simple text matching as approximation
-            # (ChromaDB handles the actual vector similarity internally)
-            similarity = self._simple_text_similarity(question, best_doc.page_content)
-            
-            # Boost similarity since this came from vector search
-            similarity = min(similarity + 0.3, 1.0)  # Add 30% boost, max 100%
+            # Use the conservative RAG similarity calculation
+            # This requires actual word matches and gives minimal boosts
+            similarity = self._calculate_rag_similarity(question, best_doc.page_content)
             
             if similarity >= self.similarity_threshold:
                 # Extract answer from the document content
@@ -361,11 +428,8 @@ class MultiMethodRAG:
                 search_result = self.wikipedia_search.run(question)
                 
                 if search_result and search_result.strip():
-                    # Calculate similarity
-                    similarity = self._simple_text_similarity(question, search_result)
-                    
-                    # Boost similarity for successful tool results
-                    similarity = min(similarity + 0.25, 1.0)
+                    # Calculate similarity using improved Wikipedia similarity function
+                    similarity = self._calculate_wikipedia_similarity(question, search_result)
                     
                     st.info(f"📊 Wikipedia search similarity: {similarity:.1%}")
                     
@@ -385,6 +449,35 @@ class MultiMethodRAG:
             st.info("🔧 Trying fallback Wikipedia API search")
             return self._fallback_wikipedia_search(question)
     
+    def _fallback_wikipedia_search(self, question: str) -> Tuple[Optional[str], float]:
+        """Fallback Wikipedia search using direct API"""
+        try:
+            # Use Wikipedia API directly
+            search_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{quote(question)}"
+            response = requests.get(search_url, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                extract = data.get('extract', '')
+                
+                if extract and len(extract) > 10:
+                    # Use improved similarity calculation
+                    similarity = self._calculate_wikipedia_similarity(question, extract)
+                    
+                    st.info(f"📊 Fallback Wikipedia similarity: {similarity:.1%}")
+                    
+                    if similarity >= self.similarity_threshold:
+                        formatted_answer = self._format_as_maha_prabhu(extract, question)
+                        return formatted_answer, similarity
+                    else:
+                        return None, similarity
+            
+            return None, 0.0
+            
+        except Exception as e:
+            st.error(f"Fallback Wikipedia search failed: {e}")
+            return None, 0.0
+
     def method_3_gpt4_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
         """Method 3: Generate response using GPT-4"""
         try:
