@@ -4,10 +4,10 @@ langchain
 langchain-core
 langchain-community
 langchain-chroma
+langchain-openai
 chromadb
 requests
 wikipedia
-duckduckgo-search
 numpy
 sentence-transformers
 

@@ -2,9 +2,8 @@
 Multi-Method RAG System with ChromaDB Vector Database
 Implements sequential search with cosine similarity thresholds:
 1. RAG Search (ChromaDB vector database)
-2. DuckDuckGo Search
-3. Wikipedia Search
-4. ChatGPT/AI Response
+2. Wikipedia Search
+3. GPT-4 Response
 
 Each method is only called if previous method's cosine similarity < 40%
 """
@@ -20,6 +19,9 @@ from urllib.parse import quote
 import numpy as np
 from datetime import datetime
 
+# Import existing AI model setup
+from .common import setup_ai_model
+
 # ChromaDB and LangChain imports
 try:
     import chromadb
@@ -28,11 +30,16 @@ try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     from langchain_chroma import Chroma
     from langchain_community.embeddings import OllamaEmbeddings
+    
+    # Wikipedia imports
+    from langchain_community.tools import WikipediaQueryRun
+    from langchain_community.utilities import WikipediaAPIWrapper
+    
     CHROMADB_AVAILABLE = True
 except ImportError as e:
     CHROMADB_AVAILABLE = False
     st.error(f"❌ Required libraries not available: {e}")
-    st.info("💡 Install with: pip install chromadb langchain langchain-community langchain-chroma")
+    st.info("💡 Install with: pip install chromadb langchain langchain-community langchain-chroma langchain-openai")
 
 class MultiMethodRAG:
     def __init__(self):
@@ -42,6 +49,11 @@ class MultiMethodRAG:
         self.is_ready = False
         self.similarity_threshold = 0.4  # 40% threshold
         self.collection_name = "astrology_knowledge"
+        
+        # Initialize tools
+        self.wikipedia_search = None
+        self.openai_llm = None
+        
         self._initialize_system()
     
     def _initialize_system(self):
@@ -54,11 +66,14 @@ class MultiMethodRAG:
             # Initialize embeddings model
             self._setup_embeddings()
             
+            # Setup Wikipedia and OpenAI tools
+            self._setup_tools()
+            
             # Setup ChromaDB and load knowledge base
             self._setup_vector_database()
             
             self.is_ready = True
-            st.success(f"🚀 Multi-Method RAG with ChromaDB initialized successfully")
+            st.success(f"🚀 Multi-Method RAG with ChromaDB, Wikipedia, and GPT-4 initialized successfully")
         except Exception as e:
             st.error(f"Failed to initialize Multi-Method RAG: {e}")
             self.is_ready = False
@@ -91,6 +106,35 @@ class MultiMethodRAG:
             st.error(f"Failed to setup Ollama embeddings: {e}")
             st.info("💡 Falling back to ChromaDB default embeddings")
             self.embeddings_model = None
+    
+    def _setup_tools(self):
+        """Setup Wikipedia and OpenAI tools"""
+        try:
+            # Initialize Wikipedia search (no API key required)
+            try:
+                self.wikipedia_search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+                st.success("✅ Wikipedia Search initialized successfully")
+            except Exception as e:
+                st.warning(f"Wikipedia Search setup failed: {e}")
+                self.wikipedia_search = None
+            
+            # Initialize OpenAI LLM using existing setup_ai_model function
+            try:
+                self.openai_llm = setup_ai_model(model_name="gpt-4", temperature=0.7)
+                if self.openai_llm:
+                    st.success("✅ OpenAI GPT-4 initialized successfully")
+                else:
+                    st.info("🔑 OpenAI setup failed - check API key configuration")
+                    st.info("💡 Set OPENAI_API_KEY for GPT-4 responses")
+            except Exception as e:
+                st.warning(f"OpenAI setup failed: {e}")
+                st.info("💡 GPT-4 will use fallback method")
+                self.openai_llm = None
+                
+        except Exception as e:
+            st.warning(f"Failed to setup tools: {e}")
+            self.wikipedia_search = None
+            self.openai_llm = None
     
     def _setup_vector_database(self):
         """Setup ChromaDB vector database with proper document loading"""
@@ -306,112 +350,127 @@ class MultiMethodRAG:
         
         return chunks
     
-    def method_2_duckduckgo_search(self, question: str) -> Tuple[Optional[str], float]:
-        """Method 2: Search using DuckDuckGo"""
+    def method_2_wikipedia_search(self, question: str) -> Tuple[Optional[str], float]:
+        """Method 2: Search using Wikipedia"""
         try:
-            # Format search query for astrology
-            search_query = f"astrology {question}"
-            
-            # Use requests to search DuckDuckGo
-            url = "https://api.duckduckgo.com/"
-            params = {
-                'q': search_query,
-                'format': 'json',
-                'no_redirect': '1',
-                'no_html': '1',
-                'skip_disambig': '1'
-            }
-            
-            response = requests.get(url, params=params, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
+            if self.wikipedia_search:
+                # Use Wikipedia tool directly
+                st.info("🔍 Using Wikipedia direct search tool")
                 
-                # Extract relevant information
-                abstract = data.get('Abstract', '')
-                definition = data.get('Definition', '')
-                related_topics = data.get('RelatedTopics', [])
+                # Search Wikipedia
+                search_result = self.wikipedia_search.run(question)
                 
-                result_text = ""
-                if abstract:
-                    result_text += abstract + " "
-                if definition:
-                    result_text += definition + " "
-                
-                # Add first few related topics
-                for topic in related_topics[:2]:
-                    if isinstance(topic, dict) and 'Text' in topic:
-                        result_text += topic['Text'] + " "
-                
-                if result_text.strip():
-                    # Calculate similarity using simple text similarity
-                    similarity = self._simple_text_similarity(question, result_text)
+                if search_result and search_result.strip():
+                    # Calculate similarity
+                    similarity = self._simple_text_similarity(question, search_result)
+                    
+                    # Boost similarity for successful tool results
+                    similarity = min(similarity + 0.25, 1.0)
+                    
+                    st.info(f"📊 Wikipedia search similarity: {similarity:.1%}")
                     
                     if similarity >= self.similarity_threshold:
                         # Format with Maha Prabhu style
-                        formatted_answer = self._format_as_maha_prabhu(result_text, question)
+                        formatted_answer = self._format_as_maha_prabhu(search_result, question)
                         return formatted_answer, similarity
                     else:
                         return None, similarity
             
-            return None, 0.0
-            
-        except Exception as e:
-            st.error(f"DuckDuckGo search failed: {e}")
-            return None, 0.0
-    
-    def method_3_wikipedia_search(self, question: str) -> Tuple[Optional[str], float]:
-        """Method 3: Search using Wikipedia"""
-        try:
-            # Format search query for astrology
-            search_terms = ["astrology", "vedic astrology", "horoscope", "zodiac"]
-            question_words = question.lower().split()
-            
-            # Combine question with astrology terms
-            search_query = f"astrology {question}"
-            
-            # Wikipedia API search
-            wiki_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
-            search_url = "https://en.wikipedia.org/w/api.php"
-            
-            # First, search for relevant pages
-            search_params = {
-                'action': 'query',
-                'format': 'json',
-                'list': 'search',
-                'srsearch': search_query,
-                'srlimit': 3
-            }
-            
-            search_response = requests.get(search_url, params=search_params, timeout=10)
-            if search_response.status_code == 200:
-                search_data = search_response.json()
-                search_results = search_data.get('query', {}).get('search', [])
-                
-                for result in search_results:
-                    page_title = result.get('title', '')
-                    if any(term in page_title.lower() for term in ['astrology', 'horoscope', 'zodiac', 'vedic']):
-                        # Get page summary
-                        summary_url = f"{wiki_url}{quote(page_title)}"
-                        summary_response = requests.get(summary_url, timeout=10)
-                        
-                        if summary_response.status_code == 200:
-                            summary_data = summary_response.json()
-                            extract = summary_data.get('extract', '')
-                            
-                            if extract:
-                                # Calculate similarity using simple text similarity
-                                similarity = self._simple_text_similarity(question, extract)
-                                
-                                if similarity >= self.similarity_threshold:
-                                    # Format with Maha Prabhu style
-                                    formatted_answer = self._format_as_maha_prabhu(extract, question)
-                                    return formatted_answer, similarity
-            
-            return None, 0.0
+            # Fallback to basic Wikipedia search if tool not available
+            st.info("🔧 Falling back to basic Wikipedia API search")
+            return self._fallback_wikipedia_search(question)
             
         except Exception as e:
             st.error(f"Wikipedia search failed: {e}")
-            return None, 0.0
+            st.info("🔧 Trying fallback Wikipedia API search")
+            return self._fallback_wikipedia_search(question)
+    
+    def method_3_gpt4_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
+        """Method 3: Generate response using GPT-4"""
+        try:
+            if self.openai_llm:
+                # Use OpenAI GPT-4 directly
+                st.info("🤖 Using OpenAI GPT-4")
+                
+                # Create enhanced prompt for Maha Prabhu
+                prompt = f"""
+                You are Maha Prabhu, a wise and experienced Vedic astrology guru with deep knowledge of literally everything. 
+                You are fun, engaging, and have a unique personality. Answer the user's question in your characteristic style.
+
+                User Question: {question}
+
+                Guidelines for your response as Maha Prabhu:
+                1. Start with "Hey Dude," as your signature greeting
+                2. Be engaging, wise, and entertaining
+                3. Use mystical and cosmic language with emojis (🌟✨🔮🚀🌙💫)
+                4. Include relevant astrological insights and wisdom
+                5. Make references to cosmic energies, planets, and spiritual guidance
+                6. Be encouraging and supportive
+                7. Add some humor while respecting the wisdom of astrology
+                8. If birth data is available, incorporate personalized insights
+                9. End with encouraging words about their spiritual journey
+
+                Remember, you have deep experience in literally everything, so provide comprehensive and wise guidance.
+                Make your response feel personal, mystical, and empowering.
+                """
+                
+                # Add birth data context if available
+                if birth_data and any(birth_data.values()):
+                    prompt += f"\n\nUser's Birth Information: {birth_data}"
+                    prompt += "\nIncorporate this birth information into your response if relevant."
+                
+                # Get response from GPT-4 (ChatOpenAI returns message with .content)
+                response = self.openai_llm.invoke(prompt)
+                response_text = response.content if hasattr(response, 'content') else str(response)
+                
+                # Since this is GPT-4, return with high confidence
+                return response_text, 1.0
+            else:
+                # Fallback to Ollama if OpenAI not available
+                return self._get_ollama_response(question, birth_data)
+                
+        except Exception as e:
+            st.error(f"GPT-4 response failed: {e}")
+            return self._get_ollama_response(question, birth_data)
+    
+    def _get_ollama_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
+        """Fallback to Ollama if OpenAI/GPT-4 not available"""
+        try:
+            # Create enhanced prompt for Maha Prabhu
+            prompt = f"""
+            You are Maha Prabhu, a wise and experienced Vedic astrology guru with deep knowledge of literally everything. 
+            You are fun, engaging, and have a unique personality. Answer the user's question in your characteristic style.
+
+            User Question: {question}
+
+            Guidelines for your response as Maha Prabhu:
+            1. Start with "Hey Dude," as your signature greeting
+            2. Be engaging, wise, and entertaining
+            3. Use mystical and cosmic language with emojis (🌟✨🔮🚀🌙💫)
+            4. Include relevant astrological insights and wisdom
+            5. Make references to cosmic energies, planets, and spiritual guidance
+            6. Be encouraging and supportive
+            7. Add some humor while respecting the wisdom of astrology
+            8. If birth data is available, incorporate personalized insights
+            9. End with encouraging words about their spiritual journey
+
+            Remember, you have deep experience in literally everything, so provide comprehensive and wise guidance.
+            Make your response feel personal, mystical, and empowering.
+            """
+            
+            # Add birth data context if available
+            if birth_data and any(birth_data.values()):
+                prompt += f"\n\nUser's Birth Information: {birth_data}"
+                prompt += "\nIncorporate this birth information into your response if relevant."
+            
+            # Try Ollama first, then fallback to other methods
+            response = self._get_ai_response(prompt)
+            
+            # Return with high confidence
+            return response, 1.0
+            
+        except Exception as e:
+            return f"🌙 Hey Dude, the cosmic signals are a bit fuzzy right now! The universe is telling me to try again later. ✨ (Error: {str(e)})", 0.5
     
     def method_4_chatgpt_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
         """Method 4: Generate AI response using ChatGPT/Ollama"""
@@ -532,18 +591,14 @@ Feel free to ask me anything else - I'm always here to help guide you on your sp
         
         methods = [
             ("ChromaDB Vector Search", self.method_1_rag_search),
-            ("DuckDuckGo Search", self.method_2_duckduckgo_search),
-            ("Wikipedia Search", self.method_3_wikipedia_search),
-            ("AI Assistant", lambda q: self.method_4_chatgpt_response(q, birth_data))
+            ("Wikipedia Search", self.method_2_wikipedia_search),
+            ("GPT-4 Response", lambda q: self.method_3_gpt4_response(q, birth_data))
         ]
         
         for method_name, method_func in methods:
             try:
                 with st.spinner(f"🔍 Searching with {method_name}..."):
-                    if method_name == "AI Assistant":
-                        response, similarity = method_func(question)
-                    else:
-                        response, similarity = method_func(question)
+                    response, similarity = method_func(question)
                     
                     if response and similarity >= self.similarity_threshold:
                         return {
@@ -552,8 +607,8 @@ Feel free to ask me anything else - I'm always here to help guide you on your sp
                             "similarity": similarity,
                             "timestamp": datetime.now().isoformat()
                         }
-                    elif method_name == "AI Assistant":
-                        # AI Assistant is our final fallback, always return its response
+                    elif method_name == "GPT-4 Response":
+                        # GPT-4 is our final fallback, always return its response
                         return {
                             "response": response,
                             "method": method_name,

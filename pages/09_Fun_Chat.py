@@ -100,10 +100,10 @@ def render_fun_chat(birth_data):
             # Choose color based on method
             if method == "ChromaDB Vector Search":
                 method_icon = "🟢"
-            elif method == "DuckDuckGo Search":
-                method_icon = "🟡"
             elif method == "Wikipedia Search":
-                method_icon = "🟠"
+                method_icon = "�"
+            elif method == "GPT-4 Response":
+                method_icon = "�"
             elif method == "AI Assistant":
                 method_icon = "🔵"
             else:
@@ -194,10 +194,10 @@ def render_fun_chat(birth_data):
                             # Color code based on method
                             if method == "ChromaDB Vector Search":
                                 method_color = "🟢"
-                            elif method == "DuckDuckGo Search":
-                                method_color = "🟡"
                             elif method == "Wikipedia Search":
-                                method_color = "🟠"
+                                method_color = "�"
+                            elif method == "GPT-4 Response":
+                                method_color = "�"
                             elif method == "AI Assistant":
                                 method_color = "🔵"
                             else:
@@ -246,8 +246,7 @@ def render_fun_chat_sidebar_info():
                 # Show search methods
                 st.write("**Search Methods:**")
                 st.caption("🟢 1. ChromaDB Vector Search")
-                st.caption("🟡 2. DuckDuckGo Search") 
-                st.caption("🟠 3. Wikipedia Search")
+                st.caption("🟠 2. Wikipedia Search") 
                 st.caption("🔵 4. AI Assistant")
                 st.caption(f"**Threshold:** {multi_rag.similarity_threshold:.0%} similarity")
                 
@@ -267,10 +266,10 @@ def render_fun_chat_sidebar_info():
             st.write("**Last Answer Source:**")
             if method == "ChromaDB Vector Search":
                 st.success(f"🟢 {method}")
-            elif method == "DuckDuckGo Search":
-                st.warning(f"🟡 {method}")
             elif method == "Wikipedia Search":
                 st.info(f"🟠 {method}")
+            elif method == "GPT-4 Response":
+                st.info(f"� {method}")
             elif method == "AI Assistant":
                 st.info(f"🔵 {method}")
             else:
@@ -331,7 +330,6 @@ def main():
             st.markdown(f"""
             **🔍 Search Methods (in order):**
             - 🟢 **ChromaDB Vector Search:** {kb_size} documents in vector database
-            - 🟡 **DuckDuckGo Search:** Live web search for astrology content  
             - 🟠 **Wikipedia Search:** Reliable encyclopedia knowledge
             - 🔵 **AI Assistant:** Personalized Maha Prabhu responses
             

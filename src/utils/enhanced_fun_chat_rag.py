@@ -1,7 +1,7 @@
 """
 Enhanced Fun Chat RAG with structured search approach
 1. First: Search RAG embeddings from RAG.txt
-2. Then: Use external tools (Wikipedia, DuckDuckGo) 
+2. Then: Use external tools (Wikipedia) 
 3. Finally: Apply Maha Prabhu template response
 """
 
@@ -19,8 +19,8 @@ try:
     from langchain_openai import ChatOpenAI
     from langchain.agents import create_react_agent, AgentExecutor
     from langchain.tools import Tool
-    from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
-    from langchain_community.utilities import WikipediaAPIWrapper, DuckDuckGoSearchAPIWrapper
+    from langchain_community.tools import WikipediaQueryRun
+    from langchain_community.utilities import WikipediaAPIWrapper
     from langchain.prompts import PromptTemplate
     from langchain.schema import OutputParserException
     LANGCHAIN_AVAILABLE = True
@@ -28,7 +28,7 @@ try:
 except ImportError as e:
     LANGCHAIN_AVAILABLE = False
     st.error(f"❌ LangChain import failed: {e}")
-    st.info("💡 Install with: pip install langchain langchain-openai langchain-community wikipedia duckduckgo-search")
+    st.info("💡 Install with: pip install langchain langchain-openai langchain-community wikipedia")
 
 class EnhancedFunChatRAG:
     def __init__(self):
@@ -264,22 +264,6 @@ class EnhancedFunChatRAG:
                 except Exception as e:
                     return f"❌ Wikipedia error: {e}"
             
-            # Tool 3: DuckDuckGo Search  
-            def duckduckgo_search_tool(query: str) -> str:
-                """STEP 2b: Search DuckDuckGo for external knowledge"""
-                try:
-                    url = f"https://api.duckduckgo.com/?q={quote(query)}&format=json&no_html=1&skip_disambig=1"
-                    response = requests.get(url, timeout=10)
-                    if response.status_code == 200:
-                        data = response.json()
-                        # Try different fields
-                        for field in ['Abstract', 'Definition', 'Answer']:
-                            if data.get(field):
-                                return f"🔍 DUCKDUCKGO FOUND: {data[field]}"
-                    return "❌ DuckDuckGo: No information found"
-                except Exception as e:
-                    return f"❌ DuckDuckGo error: {e}"
-            
             # Create structured tools
             tools = [
                 Tool(
@@ -291,11 +275,6 @@ class EnhancedFunChatRAG:
                     name="search_wikipedia", 
                     func=wikipedia_search_tool,
                     description="Use this SECOND if RAG search fails - search Wikipedia for factual information"
-                ),
-                Tool(
-                    name="search_duckduckgo",
-                    func=duckduckgo_search_tool, 
-                    description="Use this THIRD if both RAG and Wikipedia fail - search DuckDuckGo for general knowledge"
                 )
             ]
             
@@ -305,8 +284,7 @@ class EnhancedFunChatRAG:
 STRUCTURED SEARCH PROCESS:
 1. ALWAYS search RAG embeddings FIRST using search_rag_embeddings
 2. If RAG fails, search Wikipedia using search_wikipedia  
-3. If Wikipedia fails, search DuckDuckGo using search_duckduckgo
-4. Apply Maha Prabhu template to the results
+3. Apply Maha Prabhu template to the results
 
 Question: {input}
 
@@ -322,13 +300,7 @@ Action: [Use search_wikipedia if RAG failed, otherwise skip to Final Answer]
 Action Input: {input}
 Observation: [Wikipedia results if used]
 
-Thought: [Evaluate Wikipedia results, use search_duckduckgo if still no good answer]
-
-Action: [Use search_duckduckgo only if both RAG and Wikipedia failed]
-Action Input: {input}
-Observation: [DuckDuckGo results if used]
-
-Thought: Now I have all the information I need to respond as Maha Prabhu.
+Thought: [Evaluate Wikipedia results, proceed to Final Answer with best available information]
 
 Final Answer: Hey Dude! [Respond based on best available information in Maha Prabhu's mystical style with cosmic emojis and direct guidance]
 
@@ -357,7 +329,7 @@ Tool names: {tool_names}
                 return_intermediate_steps=True
             )
             
-            st.success("🎯 Structured Agent Ready: RAG → Wikipedia → DuckDuckGo → Maha Prabhu")
+            st.success("🎯 Structured Agent Ready: RAG → Wikipedia → Maha Prabhu")
             
         except Exception as e:
             st.error(f"❌ Could not setup structured agent: {e}")
@@ -381,38 +353,6 @@ Tool names: {tool_names}
                 
         except Exception as e:
             return f"Wikipedia search error: {e}"
-    
-    def _search_duckduckgo_direct(self, query: str) -> str:
-        """Direct DuckDuckGo search without LangChain"""
-        try:
-            # Simple DuckDuckGo instant answer API
-            import requests
-            from urllib.parse import quote
-            
-            url = f"https://api.duckduckgo.com/?q={quote(query)}&format=json&no_html=1&skip_disambig=1"
-            response = requests.get(url, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Try to get abstract
-                if data.get('Abstract'):
-                    return data['Abstract']
-                
-                # Try to get definition
-                if data.get('Definition'):
-                    return data['Definition']
-                
-                # Try to get answer
-                if data.get('Answer'):
-                    return data['Answer']
-                
-                return "No specific information found"
-            else:
-                return "Search failed"
-                
-        except Exception as e:
-            return f"Search error: {e}"
     
     def _apply_maha_prabhu_template(self, question: str, rag_result: Dict[str, Any], external_info: str = "") -> str:
         """Apply the Maha Prabhu template logic to generate response"""
@@ -452,7 +392,7 @@ My cosmic database shows {best_similarity}% similarity to existing wisdom, but n
         try:
             if self.use_langchain and self.agent_executor and LANGCHAIN_AVAILABLE:
                 # Use structured LangChain agent
-                st.info("🎯 Using Structured Agent: RAG → Wikipedia → DuckDuckGo → Response")
+                st.info("🎯 Using Structured Agent: RAG → Wikipedia → Response")
                 
                 result = self.agent_executor.invoke({"input": question})
                 
@@ -503,30 +443,7 @@ Consider how this knowledge aligns with your spiritual journey! The cosmos teach
         except Exception:
             pass
         
-        # Step 3: Wikipedia failed - try DuckDuckGo
-        try:
-            url = f"https://api.duckduckgo.com/?q={quote(question)}&format=json&no_html=1&skip_disambig=1"
-            response = requests.get(url, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                for field in ['Abstract', 'Definition', 'Answer']:
-                    if data.get(field):
-                        ddg_info = data[field]
-                        return f"""Hey Dude, the cosmic web search forces have revealed: 🔍
-
-{ddg_info}
-
-🌟 Through Maha Prabhu's mystical perspective: The universe provides answers through many channels! This knowledge is part of the grand cosmic tapestry.
-
-Trust that every piece of information you seek has deeper spiritual significance! The stars guide us to understanding! ✨
-
-🚀 Ready for more cosmic wisdom? Keep asking! 🌙"""
-        except Exception:
-            pass
-        
-        # Step 4: All searches failed
+        # Step 3: All searches failed
         best_similarity = int(rag_result.get("similarity", 0) * 100)
         return f"""Hey Dude, even my cosmic embeddings and universal search tools are working hard on this one! 🌙
 
