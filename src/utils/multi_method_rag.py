@@ -607,14 +607,7 @@ class MultiMethodRAG:
     def _format_as_maha_prabhu(self, content: str, original_question: str) -> str:
         """Format external content in Maha Prabhu's style"""
         formatted_response = f"""Hey Dude, 🌟
-
-Let me share some cosmic wisdom about your question: "{original_question}"
-
 {content}
-
-✨ Remember, the universe has infinite wisdom to share, and your spiritual journey is unique and beautiful! Keep exploring the cosmic mysteries, and don't hesitate to ask me more questions about the stars and beyond! 🚀🌙💫
-
-May the cosmic energies guide you always! 🔮
 """
         return formatted_response
     
