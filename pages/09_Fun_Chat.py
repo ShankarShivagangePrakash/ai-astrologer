@@ -136,10 +136,9 @@ def render_fun_chat(birth_data):
     st.write("### 💫 Fun Question Ideas:")
     
     st.markdown("""
-    - 🧙‍♂️ What is your name? (Try this for special wisdom!)
+    - 🧙‍♂️ What is your name?
     - 💪 How can I grow in life?
     - 🧘‍♀️ How do I take out stress from my life?
-    - 🏥 How can I improve my health?
     """)
     
     

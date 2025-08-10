@@ -12,6 +12,12 @@ def render_chart_summary(positions, birth_data):
     """Generate and display chart summary with strong/weak planets and chart owner"""
     st.subheader("📋 Chart Summary")
     
+    # Debug toggle
+    with st.expander("🔧 Debug Information", expanded=False):
+        debug_mode = st.checkbox("Enable debug mode", key="debug_mode")
+        if debug_mode:
+            st.info("Debug mode will show detailed planetary analysis information.")
+    
     # Analyze planetary strengths
     strong_planets, weak_planets, chart_owner = analyze_planetary_strengths(positions, birth_data)
     
@@ -36,39 +42,94 @@ def analyze_planetary_strengths(positions, birth_data):
     """Analyze planetary strengths and determine chart owner"""
     strong_planets = []
     weak_planets = []
+    processed_planets = set()
+    
+    # Debug: Check what planets we received
+    if st.session_state.get('debug_mode', False):
+        st.write("**Debug - Received planets:**", list(positions.keys()))
     
     # Simple analysis based on planetary positions and degrees
     for planet, data in positions.items():
-        if planet in ['Rahu', 'Ketu']:  # Skip shadow planets for strength analysis
+        if planet in processed_planets:  # Avoid duplicates
             continue
-            
+        processed_planets.add(planet)
+        
         degree = data.get('degree', 0)
         sign = data.get('sign', 0)
         
-        # Simple strength analysis based on degree and sign position
-        # Strong if in early/middle degrees (5-25) of favorable signs
-        if 5 <= degree <= 25:
-            # Additional checks for exaltation/own sign (simplified)
-            if planet == 'Sun' and sign in [0, 4]:  # Aries, Leo
-                strong_planets.append(planet)
-            elif planet == 'Moon' and sign in [1, 3]:  # Taurus, Cancer
-                strong_planets.append(planet)
-            elif planet == 'Mars' and sign in [0, 7]:  # Aries, Scorpio
-                strong_planets.append(planet)
-            elif planet == 'Mercury' and sign in [2, 5]:  # Gemini, Virgo
-                strong_planets.append(planet)
-            elif planet == 'Jupiter' and sign in [3, 8, 11]:  # Cancer, Sagittarius, Pisces
-                strong_planets.append(planet)
-            elif planet == 'Venus' and sign in [1, 6]:  # Taurus, Libra
-                strong_planets.append(planet)
-            elif planet == 'Saturn' and sign in [6, 9, 10]:  # Libra, Capricorn, Aquarius
-                strong_planets.append(planet)
-            else:
-                # Check if in good degree range but not in own sign
-                if 10 <= degree <= 20:
+        # Handle different data structure formats
+        if 'degree_in_sign' in data:
+            degree = data['degree_in_sign']
+        if 'sign_index' in data:
+            sign = data['sign_index']
+        
+        # Debug information
+        if st.session_state.get('debug_mode', False):
+            st.write(f"**{planet}**: Sign {sign}, Degree {degree:.2f}")
+        
+        
+        # Handle shadow planets separately
+        if planet in ['Rahu', 'Ketu']:
+            # Shadow planets strength based on degree and beneficial/malefic houses
+            # Consider Rahu/Ketu strong in specific signs and degree ranges
+            if planet == 'Rahu':
+                # Rahu is considered strong in Gemini (2), Virgo (5), Aquarius (10)
+                if sign in [2, 5, 10] and 0 <= degree <= 30:
                     strong_planets.append(planet)
                 else:
                     weak_planets.append(planet)
+            elif planet == 'Ketu':
+                # Ketu is considered strong in Sagittarius (8), Pisces (11)
+                if sign in [8, 11] and 0 <= degree <= 30:
+                    strong_planets.append(planet)
+                else:
+                    weak_planets.append(planet)
+            continue
+        
+        # Simple strength analysis based on degree and sign position
+        # Strong if in early/middle degrees (5-25) of favorable signs
+        is_strong = False
+        
+        if 5 <= degree <= 25:
+            # Additional checks for exaltation/own sign (simplified)
+            if planet == 'Sun' and sign in [0, 4]:  # Aries, Leo
+                is_strong = True
+            elif planet == 'Moon' and sign in [1, 3]:  # Taurus, Cancer
+                is_strong = True
+            elif planet == 'Mars' and sign in [0, 7]:  # Aries, Scorpio
+                is_strong = True
+            elif planet == 'Mercury' and sign in [2, 5]:  # Gemini, Virgo
+                is_strong = True
+            elif planet == 'Jupiter' and sign in [3, 8, 11]:  # Cancer, Sagittarius, Pisces
+                is_strong = True
+            elif planet == 'Venus' and sign in [1, 6]:  # Taurus, Libra
+                is_strong = True
+            elif planet == 'Saturn' and sign in [6, 9, 10]:  # Libra, Capricorn, Aquarius
+                is_strong = True
+            else:
+                # Check if in good degree range but not in own sign
+                if 10 <= degree <= 20:
+                    is_strong = True
+        else:
+            # Even if not in ideal degree range, check for exaltation/own signs
+            # with relaxed degree requirements
+            if planet == 'Sun' and sign in [0, 4]:  # Aries (exaltation), Leo (own)
+                is_strong = True
+            elif planet == 'Moon' and sign in [1, 3]:  # Taurus (exaltation), Cancer (own)
+                is_strong = True
+            elif planet == 'Mars' and sign in [0, 7, 9]:  # Aries (own), Scorpio (own), Capricorn (exaltation)
+                is_strong = True
+            elif planet == 'Mercury' and sign in [2, 5]:  # Gemini (own), Virgo (own/exaltation)
+                is_strong = True
+            elif planet == 'Jupiter' and sign in [3, 8, 11]:  # Cancer (exaltation), Sagittarius (own), Pisces (own)
+                is_strong = True
+            elif planet == 'Venus' and sign in [1, 6, 11]:  # Taurus (own), Libra (own), Pisces (exaltation)
+                is_strong = True
+            elif planet == 'Saturn' and sign in [6, 9, 10]:  # Libra (exaltation), Capricorn (own), Aquarius (own)
+                is_strong = True
+        
+        if is_strong:
+            strong_planets.append(planet)
         else:
             weak_planets.append(planet)
     
@@ -80,15 +141,24 @@ def analyze_planetary_strengths(positions, birth_data):
     
     # Ensure we have some weak planets if strong list is too long
     if len(strong_planets) > 4:
-        # Move some to weak
-        weak_planets.extend(strong_planets[4:])
+        # Move some to weak (avoid duplicates)
+        planets_to_move = strong_planets[4:]
+        for planet in planets_to_move:
+            if planet not in weak_planets:
+                weak_planets.append(planet)
         strong_planets = strong_planets[:4]
     
-    # Ensure we have some entries
-    if not strong_planets:
+    # Only add fallback entries if lists are completely empty (shouldn't happen with real data)
+    if not strong_planets and not weak_planets:
         strong_planets = ["Sun", "Moon"]
-    if not weak_planets:
         weak_planets = ["Mars", "Saturn"]
+    elif not strong_planets:
+        # If no strong planets, at least show the chart owner
+        strong_planets = [chart_owner]
+    elif not weak_planets:
+        # If no weak planets, show some common ones that aren't in strong list
+        all_planets = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"]
+        weak_planets = [p for p in all_planets if p not in strong_planets][:2]
     
     return strong_planets, weak_planets, chart_owner
 
