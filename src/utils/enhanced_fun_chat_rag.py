@@ -16,7 +16,7 @@ from urllib.parse import quote
 
 # Import LangChain for structured approach
 try:
-    from langchain_openai import ChatOpenAI
+    from langchain_community.llms import Ollama
     from langchain.agents import create_react_agent, AgentExecutor
     from langchain.tools import Tool
     from langchain_community.tools import WikipediaQueryRun
@@ -28,7 +28,7 @@ try:
 except ImportError as e:
     LANGCHAIN_AVAILABLE = False
     st.error(f"❌ LangChain import failed: {e}")
-    st.info("💡 Install with: pip install langchain langchain-openai langchain-community wikipedia")
+    st.info("💡 Install with: pip install langchain langchain-community wikipedia")
 
 class EnhancedFunChatRAG:
     def __init__(self):
@@ -49,13 +49,10 @@ class EnhancedFunChatRAG:
             
             # Setup LangChain agent if available
             if LANGCHAIN_AVAILABLE:
-                if os.getenv("OPENAI_API_KEY"):
-                    self._setup_structured_agent()
-                    self.use_langchain = True
-                    st.success("🤖 Structured Agent Mode: RAG → External Tools → Maha Prabhu Response")
-                else:
-                    st.warning("⚠️ OPENAI_API_KEY not found. Please set it for LangChain agent.")
-                    self.use_langchain = False
+                # Use Ollama instead of checking for OpenAI API key
+                self._setup_structured_agent()
+                self.use_langchain = True
+                st.success("🤖 Structured Agent Mode: RAG → External Tools → Maha Prabhu Response")
             else:
                 st.error("❌ LangChain not available. Please install required dependencies.")
                 self.use_langchain = False
@@ -235,8 +232,8 @@ class EnhancedFunChatRAG:
     def _setup_structured_agent(self):
         """Setup structured LangChain agent with proper search flow"""
         try:
-            # Initialize OpenAI
-            llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo")
+            # Initialize Ollama
+            llm = Ollama(model="llama3.2:latest", base_url="http://localhost:11434", temperature=0.7)
             
             # Tool 1: RAG Knowledge Search
             def rag_search_tool(query: str) -> str:

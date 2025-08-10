@@ -11,8 +11,8 @@ APP_CONFIG = {
 
 # AI Configuration
 AI_CONFIG = {
-    "model": "gpt-4o",
-    "base_url": "https://chat.expertcity.com/api",
+    "model": "llama3.2:latest",
+    "base_url": "http://localhost:11434",
     "temperature": 0.7,
     "max_tokens": 1000
 }
@@ -32,9 +32,9 @@ def load_custom_css():
         # CSS file not found, continue without custom styling
         pass
 
-def get_api_key():
-    """Get OpenAI API key from environment"""
-    return os.getenv("OPENAI_API_KEY")
+def get_ollama_url():
+    """Get Ollama base URL"""
+    return "http://localhost:11434"
 
 # Import environment validation from common utilities
 from src.utils.common import validate_environment

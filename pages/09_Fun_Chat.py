@@ -102,7 +102,7 @@ def render_fun_chat(birth_data):
                 method_icon = "🟢"
             elif method == "Wikipedia Search":
                 method_icon = "🟠"
-            elif method == "GPT-4 Response":
+            elif method == "Llama 3.2 Response":
                 method_icon = "🟣"
             elif method == "AI Assistant":
                 method_icon = "🔵"
@@ -185,7 +185,7 @@ def render_fun_chat(birth_data):
                                 method_color = "🟢"
                             elif method == "Wikipedia Search":
                                 method_color = "🟠"
-                            elif method == "GPT-4 Response":
+                            elif method == "Llama 3.2 Response":
                                 method_color = "🟣"
                             elif method == "AI Assistant":
                                 method_color = "🔵"
@@ -257,7 +257,7 @@ def render_fun_chat_sidebar_info():
                 st.success(f"🟢 {method}")
             elif method == "Wikipedia Search":
                 st.info(f"🟠 {method}")
-            elif method == "GPT-4 Response":
+            elif method == "Llama 3.2 Response":
                 st.info(f"🔵 {method}")
             elif method == "AI Assistant":
                 st.info(f"🔵 {method}")

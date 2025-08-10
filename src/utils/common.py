@@ -6,7 +6,7 @@ This module consolidates frequently used logic patterns.
 import streamlit as st
 import os
 from datetime import datetime, time
-from langchain_openai import ChatOpenAI
+from langchain_community.llms import Ollama
 
 # =============================================================================
 # DATE AND TIME UTILITIES
@@ -178,24 +178,20 @@ def clear_session_data():
 # AI MODEL UTILITIES
 # =============================================================================
 
-def setup_ai_model(model_name="gpt-4o", temperature=0.7, max_tokens=1000):
-    """Setup AI model with consistent configuration"""
+def setup_ai_model(model_name="llama3.2:latest", temperature=0.7, max_tokens=1000):
+    """Setup AI model with consistent configuration using Ollama"""
     try:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            st.error("⚠️ OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
-            return None
-            
-        llm = ChatOpenAI(
+        # Use Ollama instead of OpenAI
+        llm = Ollama(
             model=model_name,
-            api_key=api_key,
-            base_url="https://chat.expertcity.com/api",
-            temperature=temperature,
-            max_tokens=max_tokens
+            base_url="http://localhost:11434",
+            temperature=temperature
         )
         return llm
     except Exception as e:
-        st.error(f"⚠️ Error setting up AI model: {str(e)}")
+        st.error(f"⚠️ Error setting up Ollama model: {str(e)}")
+        st.info("💡 Make sure Ollama is running and the model is installed")
+        st.info(f"💡 Run: ollama pull {model_name}")
         return None
 
 def generate_ai_response(prompt, spinner_text="🔮 Generating response..."):
@@ -207,7 +203,8 @@ def generate_ai_response(prompt, spinner_text="🔮 Generating response..."):
     try:
         with st.spinner(spinner_text):
             response = llm.invoke(prompt)
-            return response.content
+            # Ollama returns a string directly, not an object with .content
+            return response if isinstance(response, str) else str(response)
     except Exception as e:
         return f"Unable to generate response at this time. Error: {str(e)}"
 
@@ -330,9 +327,14 @@ def validate_environment():
     """Validate required environment variables and configuration"""
     issues = []
     
-    # Check API key
-    if not os.getenv("OPENAI_API_KEY"):
-        issues.append("OpenAI API key not found")
+    # Check Ollama availability instead of OpenAI API key
+    try:
+        import requests
+        response = requests.get("http://localhost:11434/api/version", timeout=2)
+        if response.status_code != 200:
+            issues.append("Ollama server not accessible at localhost:11434")
+    except:
+        issues.append("Ollama server not running - please start Ollama")
     
     # Add other environment checks as needed
     

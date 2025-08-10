@@ -3,7 +3,7 @@ Multi-Method RAG System with ChromaDB Vector Database
 Implements sequential search with cosine similarity thresholds:
 1. RAG Search (ChromaDB vector database)
 2. Wikipedia Search
-3. GPT-4 Response
+3. Llama 3.2 Response
 
 Each method is only called if previous method's cosine similarity < 35%
 """
@@ -52,7 +52,7 @@ class MultiMethodRAG:
         
         # Initialize tools
         self.wikipedia_search = None
-        self.openai_llm = None
+        self.ollama_llm = None
         
         self._initialize_system()
     
@@ -66,14 +66,14 @@ class MultiMethodRAG:
             # Initialize embeddings model
             self._setup_embeddings()
             
-            # Setup Wikipedia and OpenAI tools
+            # Setup Wikipedia and Ollama tools
             self._setup_tools()
             
             # Setup ChromaDB and load knowledge base
             self._setup_vector_database()
             
             self.is_ready = True
-            st.success(f"🚀 Multi-Method RAG with ChromaDB, Wikipedia, and GPT-4 initialized successfully")
+            st.success(f"🚀 Multi-Method RAG with ChromaDB, Wikipedia, and Llama 3.2 initialized successfully")
         except Exception as e:
             st.error(f"Failed to initialize Multi-Method RAG: {e}")
             self.is_ready = False
@@ -108,7 +108,7 @@ class MultiMethodRAG:
             self.embeddings_model = None
     
     def _setup_tools(self):
-        """Setup Wikipedia and OpenAI tools"""
+        """Setup Wikipedia and Ollama tools"""
         try:
             # Initialize Wikipedia search (no API key required)
             try:
@@ -118,23 +118,23 @@ class MultiMethodRAG:
                 st.warning(f"Wikipedia Search setup failed: {e}")
                 self.wikipedia_search = None
             
-            # Initialize OpenAI LLM using existing setup_ai_model function
+            # Initialize Ollama LLM using existing setup_ai_model function
             try:
-                self.openai_llm = setup_ai_model(model_name="gpt-4o", temperature=0.7)
-                if self.openai_llm:
-                    st.success("✅ OpenAI GPT-4 initialized successfully")
+                self.ollama_llm = setup_ai_model(model_name="llama3.2:latest", temperature=0.7)
+                if self.ollama_llm:
+                    st.success("✅ Ollama Llama 3.2 initialized successfully")
                 else:
-                    st.info("🔑 OpenAI setup failed - check API key configuration")
-                    st.info("💡 Set OPENAI_API_KEY for GPT-4 responses")
+                    st.info("� Ollama setup failed - check if Ollama is running")
+                    st.info("💡 Start Ollama and pull llama3.2:latest model")
             except Exception as e:
-                st.warning(f"OpenAI setup failed: {e}")
-                st.info("💡 GPT-4 will use fallback method")
-                self.openai_llm = None
+                st.warning(f"Ollama setup failed: {e}")
+                st.info("💡 Llama 3.2 will use fallback method")
+                self.ollama_llm = None
                 
         except Exception as e:
             st.warning(f"Failed to setup tools: {e}")
             self.wikipedia_search = None
-            self.openai_llm = None
+            self.ollama_llm = None
     
     def _setup_vector_database(self):
         """Setup ChromaDB vector database with proper document loading"""
@@ -478,12 +478,12 @@ class MultiMethodRAG:
             st.error(f"Fallback Wikipedia search failed: {e}")
             return None, 0.0
 
-    def method_3_gpt4_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
-        """Method 3: Generate response using GPT-4"""
+    def method_3_llama_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
+        """Method 3: Generate response using Llama 3.2"""
         try:
-            if self.openai_llm:
-                # Use OpenAI GPT-4 directly
-                st.info("🤖 Using OpenAI GPT-4")
+            if self.ollama_llm:
+                # Use Ollama Llama 3.2 directly
+                st.info("� Using Ollama Llama 3.2")
                 
                 # Create enhanced prompt for Maha Prabhu
                 prompt = f"""
@@ -512,22 +512,22 @@ class MultiMethodRAG:
                     prompt += f"\n\nUser's Birth Information: {birth_data}"
                     prompt += "\nIncorporate this birth information into your response if relevant."
                 
-                # Get response from GPT-4 (ChatOpenAI returns message with .content)
-                response = self.openai_llm.invoke(prompt)
-                response_text = response.content if hasattr(response, 'content') else str(response)
+                # Get response from Llama 3.2 (Ollama returns string directly)
+                response = self.ollama_llm.invoke(prompt)
+                response_text = response if isinstance(response, str) else str(response)
                 
-                # Since this is GPT-4, return with high confidence
+                # Since this is Llama 3.2, return with high confidence
                 return response_text, 1.0
             else:
-                # Fallback to Ollama if OpenAI not available
-                return self._get_ollama_response(question, birth_data)
+                # Fallback if Ollama not available
+                return self._get_fallback_response(question, birth_data)
                 
         except Exception as e:
-            st.error(f"GPT-4 response failed: {e}")
-            return self._get_ollama_response(question, birth_data)
+            st.error(f"Llama 3.2 response failed: {e}")
+            return self._get_fallback_response(question, birth_data)
     
-    def _get_ollama_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
-        """Fallback to Ollama if OpenAI/GPT-4 not available"""
+    def _get_fallback_response(self, question: str, birth_data: Dict = None) -> Tuple[str, float]:
+        """Fallback response if Ollama not available"""
         try:
             # Create enhanced prompt for Maha Prabhu
             prompt = f"""
@@ -678,7 +678,7 @@ Feel free to ask me anything else - I'm always here to help guide you on your sp
         methods = [
             ("ChromaDB Vector Search", self.method_1_rag_search),
             ("Wikipedia Search", self.method_2_wikipedia_search),
-            ("GPT-4 Response", lambda q: self.method_3_gpt4_response(q, birth_data))
+            ("Llama 3.2 Response", lambda q: self.method_3_llama_response(q, birth_data))
         ]
         
         for method_name, method_func in methods:
