@@ -176,7 +176,7 @@ class MultiMethodRAG:
             os.makedirs(db_path, exist_ok=True)
             
             # Create Chroma vector database from astrology knowledge chunks
-            st.info(f"� Creating vector database and generating embeddings...")
+            st.info(f"⏳ Creating vector database and generating embeddings...")
             st.info(f"⏳ This may take a moment - converting {len(chunks)} chunks to vectors...")
             
             if self.embeddings_model:

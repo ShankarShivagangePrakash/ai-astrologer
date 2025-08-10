@@ -459,7 +459,7 @@ Feel free to rephrase your question or ask something else! The planets are alway
 
 While I'm consulting the universal forces, the answer to your question isn't coming through clearly at the moment. 🌙 
 
-🔮 Feel free to rephrase your question or ask something else - sometimes a different approach unlocks the cosmic wisdom! �"""
+🔮 Feel free to rephrase your question or ask something else - sometimes a different approach unlocks the cosmic wisdom! 🔴"""
     
     def is_available(self) -> bool:
         """Check if enhanced RAG system is ready"""

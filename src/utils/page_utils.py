@@ -172,10 +172,9 @@ def render_standard_disclaimer():
     st.subheader("⚠️ Important Disclaimer")
     st.warning("""
     **Please Note:**
-    - These are general guidelines based on traditional Vedic astrology
-    - Personal consultations provide more accurate and detailed analysis
-    - Results may vary based on individual circumstances and karma
-    - Always use your own judgment when making important life decisions
+    - Fun Astro Chat is intended solely for entertainment purposes; please do not take it seriously.
+    - AI-generated content can occasionally be unpredictable, so please keep this in mind and do not take it seriously.
+    - There is absolutely no intent to hurt anyone’s feelings or beliefs.
     """)
 
 def create_standard_page_layout(page_config):

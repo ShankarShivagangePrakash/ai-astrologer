@@ -101,9 +101,9 @@ def render_fun_chat(birth_data):
             if method == "ChromaDB Vector Search":
                 method_icon = "🟢"
             elif method == "Wikipedia Search":
-                method_icon = "�"
+                method_icon = "🟠"
             elif method == "GPT-4 Response":
-                method_icon = "�"
+                method_icon = "🟣"
             elif method == "AI Assistant":
                 method_icon = "🔵"
             else:
@@ -136,16 +136,6 @@ def render_fun_chat(birth_data):
     st.write("### 💫 Fun Question Ideas:")
     
     st.markdown("""
-    - 🌟 What's my cosmic vibe today?
-    - 🚀 Tell me a fun astrology fact!
-    - 💫 What do the stars say about me today?
-    - 🌙 How do moon phases affect me?
-    - ⭐ What's my zodiac sign's superpower?
-    - 🔮 Can you read my planetary influences?
-    - 🌌 Tell me about my birth chart personality
-    - 💎 What gemstone suits my energy?
-    - 🕉️ What rituals would help me?
-    - 🎭 How do I vibe with other signs?
     - 🧙‍♂️ What is your name? (Try this for special wisdom!)
     - 💪 How can I grow in life?
     - 🧘‍♀️ How do I take out stress from my life?
@@ -195,9 +185,9 @@ def render_fun_chat(birth_data):
                             if method == "ChromaDB Vector Search":
                                 method_color = "🟢"
                             elif method == "Wikipedia Search":
-                                method_color = "�"
+                                method_color = "🟠"
                             elif method == "GPT-4 Response":
-                                method_color = "�"
+                                method_color = "🟣"
                             elif method == "AI Assistant":
                                 method_color = "🔵"
                             else:
@@ -269,7 +259,7 @@ def render_fun_chat_sidebar_info():
             elif method == "Wikipedia Search":
                 st.info(f"🟠 {method}")
             elif method == "GPT-4 Response":
-                st.info(f"� {method}")
+                st.info(f"🔵 {method}")
             elif method == "AI Assistant":
                 st.info(f"🔵 {method}")
             else:
